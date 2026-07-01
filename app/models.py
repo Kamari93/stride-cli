@@ -1,0 +1,1 @@
+# Defines the data. Activity, Goal. Nothing else.
