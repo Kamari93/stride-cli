@@ -4,21 +4,20 @@ A Python CLI application for tracking walking and running progress with goals, s
 ## Description
 The basic idea is a CLI application where users log walks and runs, then view statistics about their progress over time.
 
-## Features (Planned)
-1. Log Activity
-2. View Activity History
-3. View Statistics
-4. Set Goals
-5. Exit
-6. Weekly Summaries (Future)
-7. Personal Records (Future)
-8. Goal Tracker (Future)
-9. Search (Future)
-10. Export (Future)
-11. Achievments (Future)
-12. Pace Calculator (Future)
-13. Weather Integration (Future)
-14. Maps (Future)
+## Current Features
+
+- Log activities
+- View activity history
+- View statistics
+- Set goals
+
+## Planned Features
+
+- Weekly summaries
+- Personal records
+- Achievements
+- Export to CSV
+- Weather integration
 
 ## Technologies
 1. rich - CLI, tables, colors, panels.
