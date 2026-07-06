@@ -17,7 +17,7 @@
 - How should goals be represented?
 
 ## Activity Model
-- id
+- id (automatically generated)
 - date
 - activity_type (run/walk)
 - distance (miles)
@@ -25,3 +25,7 @@
 - notes
 - route 
 - weather (future)
+- calculate_pace() behavior - calculate pace from distance / duration.
+- __str__() behavior - represent self as a str for display.
+- to_dict() behavior - convert itself into a plain dictionary of its own data.
+- __post_init__() behavior - from @dataclass used to validate data input.
