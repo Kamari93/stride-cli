@@ -29,3 +29,16 @@
 - __str__() behavior - represent self as a str for display.
 - to_dict() behavior - convert itself into a plain dictionary of its own data.
 - __post_init__() behavior - from @dataclass used to validate data input.
+
+## Services Layer
+# Responsibilities
+- Create activities
+- Retrieve activities
+- Update activities
+- Delete activities
+- Validate business rules
+- Coordinate communication between the CLI and the database
+# Does NOT:
+- Display menus
+- Execute SQL
+- Store application state

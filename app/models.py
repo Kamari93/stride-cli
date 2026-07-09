@@ -1,4 +1,5 @@
 # Defines the data. Activity, Goal. Nothing else.
+# Models are usually nouns.
 from dataclasses import dataclass, field
 from datetime import date
 from uuid import UUID, uuid4
