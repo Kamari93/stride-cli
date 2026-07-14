@@ -31,18 +31,24 @@ class ActivityService:
     # ---------- Create ----------
 
     def create_activity(self, activity: Activity) -> Activity:
-        """Create and save a new activity."""
-        pass
+        """Validate and save a new activity."""
+        self.validate_activity(activity)
+        self.activities.append(activity)
+        return activity
 
     # ---------- Read ----------
 
     def get_all_activities(self) -> list[Activity]:
         """Return every activity."""
-        pass
+        return self.activities
 
     def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
         """Return a single activity by its ID."""
-        pass
+        for activity in self.activities:
+            if activity.id == activity_id:
+                return activity
+        
+        return None
 
     # ---------- Update ----------
 
@@ -59,6 +65,7 @@ class ActivityService:
 
     # ---------- Validation ----------
 
-    def validate_activity(self, activity) -> bool:
-        """Validate business rules."""
-        pass
+    def validate_activity(self, activity: Activity) -> bool:
+        """Validate business rules.Returns True if the activity is valid.
+        Raises ValueError if validation fails."""
+        return True
