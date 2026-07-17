@@ -17,7 +17,7 @@
 # - Store application state
 
 # Keep the service from having to know every field individually.
-from .models import Activity
+from app.models import Activity
 from uuid import UUID
 
 class ActivityService:
