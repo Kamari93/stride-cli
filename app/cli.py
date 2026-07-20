@@ -69,8 +69,11 @@ class CLI:
             choices=["walk", "run"],
         )
 
-        distance = float(Prompt.ask("Distance (miles)"))
-        duration = float(Prompt.ask("Duration (minutes)"))
+        # distance = float(Prompt.ask("Distance (miles)"))
+        # duration = float(Prompt.ask("Duration (minutes)"))
+
+        distance = self.prompt_for_float("Distance (miles)")
+        duration = self.prompt_for_float("Duration (minutes)")
 
         notes = Prompt.ask(
             "Notes (optional)",
@@ -138,6 +141,15 @@ class CLI:
     def show_success(self, msg: str) -> None:
         '''Display a success message.'''
         self.console.print(f"[green]✓ {msg}[/green]")
+
+    def prompt_for_float(self, prompt: str) -> float:
+        '''Prompt until the user enters a valid number.'''
+
+        while True:
+            try:
+                return float(Prompt.ask(prompt))
+            except:
+                self.show_error("Please enter a valid number.")
 
     def exit(self) -> None:
         '''Exit the app.'''
