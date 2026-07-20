@@ -24,10 +24,33 @@ class Activity:
             raise ValueError("Activity type must be 'walk' or 'run'.")
     
     # TODO: calculate_pace(self) -> float
-    # Return minutes per mile.
+    def calculate_pace(self) -> float:
+        # Return minutes per mile.
+        "Return pace in minutes per mile"
+        return self.duration / self.distance
 
     # TODO: __str__(self) -> str
-    # Return a user-friendly representation of the activity.
+    def __str__(self) -> str:
+        # Return a user-friendly representation of the activity.
+        notes = self.notes if self.notes else "None"
+        return (
+            f"{self.activity_type.title()} | "
+            f"{self.distance:.1f} mi | "
+            f"{self.duration:.0f} min | "
+            f"Pace: {self.calculate_pace():.1f} min/mi | "
+            f"Notes: {notes} | "
+            f"Date: {self.date}"
+        )
 
     # TODO: to_dict(self) -> dict
-    # Convert the Activity object into a dictionary.
+    def to_dict(self) -> dict:
+        # Convert the Activity object into a dictionary.
+        return {
+            "id": str(self.id),
+            "date": self.date.isoformat(),
+            "activity_type": self.activity_type,
+            "distance": self.distance,
+            "duration": self.duration,
+            "notes": self.notes,
+            "route": self.route,
+        }

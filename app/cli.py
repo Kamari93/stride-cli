@@ -4,6 +4,8 @@
 from rich.console import Console
 from rich.panel import Panel 
 from rich.prompt import Prompt
+from rich.table import Table
+from rich import box
 
 from app.models import Activity
 from app.services import ActivityService
@@ -47,7 +49,7 @@ class CLI:
             choices = ["1", "2", "3"],
         )
 
-    def handle_menu_choice(self, choice) -> None:
+    def handle_menu_choice(self, choice: str) -> None:
         '''Route the user's choice to the appropriate feature.'''
         if choice == "1":
             self.log_activity()
@@ -84,11 +86,12 @@ class CLI:
 
         self.activity_service.create_activity(activity)
 
-        self.console.print("[green]✓ Activity logged successfully![/green]")
+        # self.console.print("[green]✓ Activity logged successfully![/green]")
+        self.show_success("Activity logged successfully!")
 
     def show_activities(self) -> None:
         '''Display all recorded activities.'''
-        self.console.print("\n[bold]Activities[/bold]")
+        # self.console.print("\n[bold]Activities[/bold]")
 
         activities = self.activity_service.get_all_activities()
 
@@ -96,24 +99,45 @@ class CLI:
             self.console.print("[yellow]No activities logged yet.[/yellow]")
             return
         
-        for activity in activities:
-            self.console.print(activity)
+        table = Table(show_header=True, title="Activities", header_style="bold green", box=box.ROUNDED)
+        table.add_column("Type")
+        table.add_column("Distance")
+        table.add_column("Duration")
+        table.add_column("Pace")
+        table.add_column("Notes")
+        table.add_column("Date")
+        
 
-    def show_statistics(self):
+        # for activity in activities:
+        #     self.console.print(str(activity))
+
+        for activity in activities:
+            table.add_row(
+                f"{activity.activity_type.title()}",
+                f"{activity.distance:.1f} mi",
+                f"{activity.duration:.0f} min",
+                f"{activity.calculate_pace():.1f} min/mi",
+                f"{activity.notes or "-"}",
+                f"{activity.date}",
+            )
+        self.console.print("\n")
+        self.console.print(table)
+
+    def show_statistics(self) -> None:
         '''Display activity statistics.'''
         pass
 
-    def show_goals(self):
+    def show_goals(self) -> None:
         '''Display goal information.'''
         pass
 
-    def show_error(self, msg):
+    def show_error(self, msg: str) -> None:
         '''Display an error message.'''
-        pass
+        self.console.print(f"[red]{msg}[/red]")
 
-    def show_success(self, msg):
+    def show_success(self, msg: str) -> None:
         '''Display a success message.'''
-        pass
+        self.console.print(f"[green]✓ {msg}[/green]")
 
     def exit(self) -> None:
         '''Exit the app.'''
