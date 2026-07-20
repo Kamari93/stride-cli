@@ -79,18 +79,22 @@ class CLI:
             "Notes (optional)",
             default = "",
         )
+        try:
+            activity = Activity(
+                activity_type = activity_type,
+                distance = distance,
+                duration = duration,
+                notes = notes or None,
+            )
 
-        activity = Activity(
-            activity_type = activity_type,
-            distance = distance,
-            duration = duration,
-            notes = notes or None,
-        )
-
-        self.activity_service.create_activity(activity)
-
+            self.activity_service.create_activity(activity)
+        except ValueError as e:
+            self.show_error(str(e))
+            return
+        
         # self.console.print("[green]✓ Activity logged successfully![/green]")
         self.show_success("Activity logged successfully!")
+        
 
     def show_activities(self) -> None:
         '''Display all recorded activities.'''
@@ -136,21 +140,38 @@ class CLI:
 
     def show_error(self, msg: str) -> None:
         '''Display an error message.'''
-        self.console.print(f"[red]{msg}[/red]")
+        self.console.print(f"[bold red]x {msg}[/bold red]")
 
     def show_success(self, msg: str) -> None:
         '''Display a success message.'''
-        self.console.print(f"[green]✓ {msg}[/green]")
+        self.console.print(f"[bold green]✓ {msg}[/bold green]")
 
     def prompt_for_float(self, prompt: str) -> float:
         '''Prompt until the user enters a valid number.'''
-
         while True:
             try:
                 return float(Prompt.ask(prompt))
             except:
                 self.show_error("Please enter a valid number.")
+    
+    def prompt_for_int(self, prompt: str) -> int:
+        '''Prompt until the user enters a valid integer.'''
+        while True:
+            try:
+                return int(Prompt.ask(prompt))
+            except:
+                self.show_error("Please enter a valid integer.")
 
+    def prompt_for_optional_text(self, prompt: str) -> str | None:
+        '''Prompt the user for text. Returns None if the user leaves it blank.'''
+        while True:
+            try:
+                input = Prompt.ask(prompt).strip()
+                return input if input else None
+
+            except:
+                self.show_error("Please enter a valid text input.")
+    
     def exit(self) -> None:
         '''Exit the app.'''
         self.console.print("\nGoodbye!")
