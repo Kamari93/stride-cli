@@ -94,6 +94,7 @@ class CLI:
         
         # self.console.print("[green]✓ Activity logged successfully![/green]")
         self.show_success("Activity logged successfully!")
+        self.pause()
         
 
     def show_activities(self) -> None:
@@ -129,6 +130,7 @@ class CLI:
             )
         self.console.print("\n")
         self.console.print(table)
+        self.pause()
 
     def show_statistics(self) -> None:
         '''Display activity statistics.'''
@@ -172,6 +174,9 @@ class CLI:
             except:
                 self.show_error("Please enter a valid text input.")
     
+    def pause(self) -> None:
+        Prompt.ask("\nPress Enter to continue")
+
     def exit(self) -> None:
         '''Exit the app.'''
         self.console.print("\nGoodbye!")
