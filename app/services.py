@@ -54,18 +54,33 @@ class ActivityService:
 
     def update_activity( self, activity_id: UUID, **changes) -> Activity | None:
         """Update an existing activity."""
-        pass
+        activity = self.get_activity_by_id(activity_id)
+
+        # activity not found
+        if not activity:
+            return None 
+        
+        for key, val in changes.items():
+            if hasattr(activity, key):
+                setattr(activity, key, val)
+        
+        return activity
 
     # ---------- Delete ----------
 
     def delete_activity(self, activity_id: UUID) -> bool:
         """Delete an activity."""
-        pass
+        for index, activity in enumerate(self.activities):
+            if activity.id == activity_id:
+                self.activities.pop(index)
+                return True
+        
+        return False
 
 
     # ---------- Validation ----------
 
     def validate_activity(self, activity: Activity) -> bool:
-        """Validate business rules.Returns True if the activity is valid.
+        """Validate business rules. Returns True if the activity is valid.
         Raises ValueError if validation fails."""
         return True

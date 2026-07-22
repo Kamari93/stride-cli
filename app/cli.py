@@ -75,10 +75,11 @@ class CLI:
         distance = self.prompt_for_float("Distance (miles)")
         duration = self.prompt_for_float("Duration (minutes)")
 
-        notes = Prompt.ask(
-            "Notes (optional)",
-            default = "",
-        )
+        # notes = Prompt.ask(
+        #     "Notes (optional)",
+        #     default = "",
+        # )
+        notes = self.prompt_for_optional_text("Notes (optional)")
         try:
             activity = Activity(
                 activity_type = activity_type,
@@ -153,7 +154,7 @@ class CLI:
         while True:
             try:
                 return float(Prompt.ask(prompt))
-            except:
+            except ValueError:
                 self.show_error("Please enter a valid number.")
     
     def prompt_for_int(self, prompt: str) -> int:
@@ -161,7 +162,7 @@ class CLI:
         while True:
             try:
                 return int(Prompt.ask(prompt))
-            except:
+            except ValueError:
                 self.show_error("Please enter a valid integer.")
 
     def prompt_for_optional_text(self, prompt: str) -> str | None:
