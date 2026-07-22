@@ -40,13 +40,15 @@ class CLI:
         self.console.print("\n[bold]Main Menu[/bold]")
         self.console.print("1. Log Activity")
         self.console.print("2. View Activities")
-        self.console.print("3. Exit")
+        self.console.print("3. Edit Activity")
+        self.console.print("4. Delete Activity")
+        self.console.print("5. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3"],
+            choices = ["1", "2", "3", "4", "5"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
@@ -58,6 +60,12 @@ class CLI:
             self.show_activities()
 
         elif choice == "3":
+            self.edit_activity()
+        
+        elif choice == "4":
+            self.delete_activity()
+
+        elif choice == "5":
             self.exit()
 
     def log_activity(self) -> None:
@@ -109,6 +117,7 @@ class CLI:
             return
         
         table = Table(show_header=True, title="Activities", header_style="bold green", box=box.ROUNDED)
+        table.add_column("#")
         table.add_column("Type")
         table.add_column("Distance")
         table.add_column("Duration")
@@ -120,18 +129,25 @@ class CLI:
         # for activity in activities:
         #     self.console.print(str(activity))
 
-        for activity in activities:
+        for idx, activity in enumerate(activities, start=1):
             table.add_row(
-                f"{activity.activity_type.title()}",
+                str(idx),
+                activity.activity_type.title(),
                 f"{activity.distance:.1f} mi",
                 f"{activity.duration:.0f} min",
                 f"{activity.calculate_pace():.1f} min/mi",
-                f"{activity.notes or "-"}",
-                f"{activity.date}",
+                activity.notes or "-",
+                str(activity.date),
             )
         self.console.print("\n")
         self.console.print(table)
         self.pause()
+
+    def edit_activity(self) -> None:
+        self.console.print("coming soon")
+
+    def delete_activity(self) -> None:
+        self.console.print("coming soon")
 
     def show_statistics(self) -> None:
         '''Display activity statistics.'''
