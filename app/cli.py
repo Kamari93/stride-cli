@@ -191,6 +191,19 @@ class CLI:
             except:
                 self.show_error("Please enter a valid text input.")
     
+    def prompt_for_optional_float(self, prompt: str) -> float | None:
+        '''Prompt for a number. Press Enter to keep the current value.'''
+        while True:
+            value = Prompt.ask(prompt, default="").strip()
+
+            if value == "":
+                return None
+            
+            try:
+                return float(value)
+            except ValueError:
+                self.show_error("Please enter a valid number.")
+            
     def select_activity(self) -> Activity | None:
         '''Display activities and return the selected one.'''
         activities = self.activity_service.get_all_activities()
