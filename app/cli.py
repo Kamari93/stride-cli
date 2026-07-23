@@ -144,10 +144,68 @@ class CLI:
         self.pause()
 
     def edit_activity(self) -> None:
-        self.console.print("coming soon")
+        '''Edit an existing activity.'''
+        # self.console.print("coming soon")
+        activity = self.select_activity()
+
+        if activity is None:
+            return
+
+        self.console.print("\n[bold]Edit Activity[/bold]")
+
+        distance = self.prompt_for_optional_float(f"Distance [{activity.distance}]")
+        duration = self.prompt_for_optional_float(f"Duration [{activity.duration}]")
+        notes = Prompt.ask(f"Notes [{activity.notes or ""}]", default=activity.notes or "",)
+
+        try:
+            updated_activity = Activity(
+                activity_type = activity.activity_type,
+                distance = distance if distance is not None else activity.distance,
+                duration = duration if duration is not None else activity.duration,
+                notes = notes or None,
+                # route = activity.route 
+            )
+
+            self.activity_service.update_activity(activity.id, updated_activity)
+        
+        except ValueError as e:
+            self.show_error(e)
+            return 
+        
+        self.show_success("Activity updated successfully!")
+        self.pause()
+
 
     def delete_activity(self) -> None:
-        self.console.print("coming soon")
+        '''Delete an existing activity'''
+        # self.console.print("coming soon")
+
+        activity = self.select_activity()
+
+        if activity is None:
+            return 
+        
+        # self.console.print("\n[bold red]Delete Activity[/bold red]")
+        # self.console.print(activity)
+        self.console.print("\n[bold red]You are about to delete:[/bold red]")
+        self.console.print(str(activity)) # utilize __str__ method from Activity model to display
+
+        confirm = Prompt.ask("Are you sure you want to delete this activity? (y/n)", choices=["y", "n"], default="n")
+
+        if confirm == "n":
+            self.console.print("[yellow]Deletion cancelled[/yellow]")
+            self.pause()
+            return
+        
+        deleted = self.activity_service.delete_activity(activity.id)
+        
+        if deleted:
+            self.show_success("Activity deleted successfully!")
+        
+        else:
+            self.show_error("Activity could not be deleted")
+        
+        self.pause()
 
     def show_statistics(self) -> None:
         '''Display activity statistics.'''
