@@ -191,6 +191,27 @@ class CLI:
             except:
                 self.show_error("Please enter a valid text input.")
     
+    def select_activity(self) -> Activity | None:
+        '''Display activities and return the selected one.'''
+        activities = self.activity_service.get_all_activities()
+
+        if not activities:
+            self.show_error("No activities found.")
+            return None
+
+        self.show_activities()
+
+        while True:
+            choice = self.prompt_for_int("Select activity number (0 to cancel)")
+
+            if choice == 0:
+                return None
+
+            if 1 <= choice <= len(activities):
+                return activities[choice - 1]
+            
+            self.show_error("Invalid activity number.")
+
     def pause(self) -> None:
         Prompt.ask("\nPress Enter to continue")
 
