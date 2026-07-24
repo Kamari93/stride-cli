@@ -44,11 +44,20 @@ class ActivityService:
 
     def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
         """Return a single activity by its ID."""
-        for activity in self.activities:
-            if activity.id == activity_id:
-                return activity
+        # for activity in self.activities:
+        #     if activity.id == activity_id:
+        #         return activity
+        # return None
+
+        result = self._find_activity(activity_id)
+
+        if result is None:
+            return None
+
+        _, activity = result # decouple and extract activity ignore id as we don't need for this fn
+
+        return activity
         
-        return None
 
     # ---------- Update ----------
 
@@ -77,6 +86,14 @@ class ActivityService:
         
         return False
 
+    # ---------- Find Activity Private Helper ----------
+    def _find_activity(self, activity_id: UUID) -> tuple[int, Activity] | None:
+        '''Return the index and Activity for the given ID. Returns None if the activity is not found.'''
+        for idx, activity in enumerate(self.activities):
+            if activity.id == activity_id:
+                return idx, activity
+        
+        return None
 
     # ---------- Validation ----------
 
