@@ -187,10 +187,10 @@ class CLI:
         
         # self.console.print("\n[bold red]Delete Activity[/bold red]")
         # self.console.print(activity)
-        self.console.print("\n[bold red]You are about to delete:[/bold red]")
+        self.console.print("\n[bold red]You are about to delete:[/bold red]\n")
         self.console.print(str(activity)) # utilize __str__ method from Activity model to display
 
-        confirm = Prompt.ask("Are you sure you want to delete this activity? (y/n)", choices=["y", "n"], default="n")
+        confirm = Prompt.ask("\nAre you sure you want to delete this activity?", choices=["y", "n"], default="n")
 
         if confirm == "n":
             self.console.print("[yellow]Deletion cancelled[/yellow]")
