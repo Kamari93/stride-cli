@@ -243,8 +243,8 @@ class CLI:
         '''Prompt the user for text. Returns None if the user leaves it blank.'''
         while True:
             try:
-                input = Prompt.ask(prompt).strip()
-                return input if input else None
+                text = Prompt.ask(prompt).strip()
+                return text if text else None
 
             except:
                 self.show_error("Please enter a valid text input.")
