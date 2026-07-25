@@ -242,12 +242,14 @@ class CLI:
     def prompt_for_optional_text(self, prompt: str) -> str | None:
         '''Prompt the user for text. Returns None if the user leaves it blank.'''
         while True:
-            try:
-                text = Prompt.ask(prompt).strip()
-                return text if text else None
+            text = Prompt.ask(prompt).strip()
+            return text if text else None
+            # try:
+            #     text = Prompt.ask(prompt).strip()
+            #     return text if text else None
 
-            except:
-                self.show_error("Please enter a valid text input.")
+            # except Exception:
+            #     self.show_error("Please enter a valid text input.")
     
     def prompt_for_optional_float(self, prompt: str) -> float | None:
         '''Prompt for a number. Press Enter to keep the current value.'''
