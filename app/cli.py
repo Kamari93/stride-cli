@@ -104,12 +104,9 @@ class CLI:
         # self.console.print("[green]✓ Activity logged successfully![/green]")
         self.show_success("Activity logged successfully!")
         self.pause()
-        
 
-    def show_activities(self) -> None:
-        '''Display all recorded activities.'''
-        # self.console.print("\n[bold]Activities[/bold]")
-
+    def display_activities(self) -> None:
+        '''Display all recorded activities in a table'''
         activities = self.activity_service.get_all_activities()
 
         if not activities:
@@ -125,10 +122,6 @@ class CLI:
         table.add_column("Notes")
         table.add_column("Date")
         
-
-        # for activity in activities:
-        #     self.console.print(str(activity))
-
         for idx, activity in enumerate(activities, start=1):
             table.add_row(
                 str(idx),
@@ -141,6 +134,11 @@ class CLI:
             )
         self.console.print("\n")
         self.console.print(table)
+
+    def show_activities(self) -> None:
+        '''Display activities and wait for the user.'''
+        # self.console.print("\n[bold]Activities[/bold]")
+        self.display_activities()
         self.pause()
 
     def edit_activity(self) -> None:
