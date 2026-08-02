@@ -130,7 +130,8 @@ class CLI:
                 f"{activity.duration:.0f} min",
                 f"{activity.calculate_pace():.1f} min/mi",
                 activity.notes or "-",
-                str(activity.date),
+                # str(activity.date),
+                activity.date.strftime("%b %d, %Y %I:%M %p"),
             )
         self.console.print("\n")
         self.console.print(table)
