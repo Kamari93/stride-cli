@@ -36,6 +36,10 @@ class Activity:
         seconds = round((pace - minutes) * 60)
         return f"{minutes}:{seconds:02d} min/mi"
     
+    def formatted_date(self) -> str:
+        #Return a user-friendly date and time.
+        return self.date.strftime("%b %d, %Y %I:%M %p")
+    
     # TODO: __str__(self) -> str
     def __str__(self) -> str:
         # Return a user-friendly representation of the activity.

@@ -132,7 +132,7 @@ class CLI:
                 activity.formatted_pace(),
                 activity.notes or "-",
                 # str(activity.date),
-                activity.date.strftime("%b %d, %Y %I:%M %p"),
+                activity.formatted_date(),
             )
         self.console.print("\n")
         self.console.print(table)
