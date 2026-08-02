@@ -270,7 +270,8 @@ class CLI:
             self.show_error("No activities found.")
             return None
 
-        self.show_activities()
+        # self.show_activities()
+        self.display_activities()
 
         while True:
             choice = self.prompt_for_int("Select activity number (0 to cancel)")

@@ -1,7 +1,7 @@
 # Defines the data. Activity, Goal. Nothing else.
 # Models are usually nouns.
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import datetime
 from uuid import UUID, uuid4
 
 @dataclass
@@ -10,7 +10,7 @@ class Activity:
     activity_type: str 
     distance: float # miles
     duration: float # minutes
-    date: date = field(default_factory=date.today)
+    date: datetime = field(default_factory=datetime.now)
     id: UUID = field(default_factory=uuid4, init=False) # generate its own id automatically w/o CLI
     notes: str | None = None
     route: str | None = None
