@@ -29,6 +29,13 @@ class Activity:
         "Return pace in minutes per mile"
         return self.duration / self.distance
 
+    def formatted_pace(self) -> str:
+        # Return pace formatted as MM:SS.
+        pace = self.calculate_pace()
+        minutes = int(pace)
+        seconds = round((pace - minutes) * 60)
+        return f"{minutes}:{seconds:02d} min/mi"
+    
     # TODO: __str__(self) -> str
     def __str__(self) -> str:
         # Return a user-friendly representation of the activity.
