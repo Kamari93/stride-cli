@@ -31,7 +31,7 @@ class ActivityRepository:
                 duration REAL NOT NULL,
                 date TEXT NOT NULL,
                 notes TEXT,
-                route TEXT,
+                route TEXT
             )
 
             '''
@@ -41,7 +41,7 @@ class ActivityRepository:
     def close(self) -> None:
         '''Close the SQLite connection.'''
         self.connection.close()
-        
+
     def create_activity(self, activity: Activity) -> Activity:
         '''Save a new activity.'''
         pass
