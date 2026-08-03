@@ -82,18 +82,20 @@ class CLI:
 
         distance = self.prompt_for_float("Distance (miles)")
         duration = self.prompt_for_float("Duration (minutes)")
-
+    
         # notes = Prompt.ask(
         #     "Notes (optional)",
         #     default = "",
         # )
         notes = self.prompt_for_optional_text("Notes (optional)")
+        route = self.prompt_for_optional_text("Route (optional)")
         try:
             activity = Activity(
                 activity_type = activity_type,
                 distance = distance,
                 duration = duration,
                 notes = notes or None,
+                route = route,
             )
 
             self.activity_service.create_activity(activity)
@@ -120,6 +122,7 @@ class CLI:
         table.add_column("Duration")
         table.add_column("Pace")
         table.add_column("Notes")
+        table.add_column("Route")
         table.add_column("Date")
         
         for idx, activity in enumerate(activities, start=1):
@@ -131,6 +134,7 @@ class CLI:
                 # f"{activity.calculate_pace():.1f} min/mi",
                 activity.formatted_pace(),
                 activity.notes or "-",
+                activity.route or "-",
                 # str(activity.date),
                 activity.formatted_date(),
             )
@@ -156,6 +160,7 @@ class CLI:
         distance = self.prompt_for_optional_float(f"Distance [{activity.distance}]")
         duration = self.prompt_for_optional_float(f"Duration [{activity.duration}]")
         notes = Prompt.ask(f"Notes [{activity.notes or ""}]", default=activity.notes or "",)
+        route = Prompt.ask(f"Route [{activity.route or ""}]", default=activity.route or "",)
 
         try:
             updated_activity = Activity(
@@ -163,6 +168,7 @@ class CLI:
                 distance = distance if distance is not None else activity.distance,
                 duration = duration if duration is not None else activity.duration,
                 notes = notes or None,
+                route = route or None,
                 # route = activity.route 
             )
 

@@ -44,13 +44,16 @@ class Activity:
     def __str__(self) -> str:
         # Return a user-friendly representation of the activity.
         notes = self.notes if self.notes else "None"
+        route = self.route if self.route else "None"
         return (
             f"{self.activity_type.title()} | "
             f"{self.distance:.1f} mi | "
             f"{self.duration:.0f} min | "
-            f"Pace: {self.calculate_pace():.1f} min/mi | "
+            # f"Pace: {self.calculate_pace():.1f} min/mi | "
+            f"Pace: {self.formatted_pace()} | "
             f"Notes: {notes} | "
-            f"Date: {self.date}"
+            f"Route: {route} | "
+            f"Date: {self.formatted_date()}"
         )
 
     # TODO: to_dict(self) -> dict
