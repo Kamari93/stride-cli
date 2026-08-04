@@ -42,5 +42,27 @@ def test_create_activity(repository):
 
     assert created == activity
 
+def test_create_activity_inserts_row(repository):
+    '''Repository should insert a row into SQLite.'''
+    activity = Activity(activity_type="walk", distance=2.5, duration=40, notes="Evening walk", route="Buffalo Bayou")
+    repository.create_activity(activity)
+
+    cursor = repository.connection.cursor()
+    cursor.execute(
+        '''
+        SELECT *
+        FROM activities
+        '''
+    )
+
+    row = cursor.fetchone()
+
+    assert row is not None
+    assert row["activity_type"] == "walk"
+    assert row["distance"] == 2.5
+    assert row["duration"] == 40
+    assert row["notes"] == "Evening walk"
+    assert row["route"] == "Buffalo Bayou"
+
 if __name__ == "__main__":
     pytest.main([__file__])
