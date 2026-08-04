@@ -35,7 +35,7 @@ def test_repository_creates_table(repository):
     assert table is not None
     # repository.close()
 
-def test_create_activities(repository):
+def test_create_activity(repository):
     '''Repository should store an activity. Verifies that method executes, no exceptions, and returned object'''
     activity = Activity(activity_type="run", distance=3.2, duration=28, notes="Morning run",)
     created = repository.create_activity(activity)
