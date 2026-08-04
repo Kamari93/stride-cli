@@ -43,8 +43,34 @@ class ActivityRepository:
         self.connection.close()
 
     def create_activity(self, activity: Activity) -> Activity:
-        '''Save a new activity.'''
-        pass
+        '''Stores a new activity to the database.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO activities (
+                id,
+                activity_type,
+                distance,
+                duration,
+                date,
+                notes,
+                route
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (
+                str(activity.id),
+                activity.activity_type,
+                activity.distance,
+                activity.duration,
+                activity.date.isoformat(),
+                activity.notes,
+                activity.route,
+            ),
+        )
+        self.connection.commit()
+        return activity
 
     def get_all_activities(self) -> list[Activity]:
         '''Return all stored activities.'''
