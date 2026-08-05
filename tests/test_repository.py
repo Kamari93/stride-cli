@@ -64,5 +64,41 @@ def test_create_activity_inserts_row(repository):
     assert row["notes"] == "Evening walk"
     assert row["route"] == "Buffalo Bayou"
 
+def test_create_activity_stores_uuid(repository):
+    '''Repository should store the Activity UUID.'''
+    activity = Activity(activity_type="run", distance=5, duration=45,)
+    repository.create_activity(activity)
+
+    cursor = repository.connection.cursor()
+    cursor.execute(
+        '''
+        SELECT id FROM activities
+        '''
+    )
+
+    row = cursor.fetchone()
+
+    assert row["id"] == str(activity.id)
+
+def test_create_activity_with_no_optional_fields(repository):
+    '''Repository should allow notes and route to be NULL.'''
+
+    activity = Activity(activity_type="walk", distance=1, duration=18,)
+    repository.create_activity(activity)
+
+    cursor = repository.connection.cursor()
+    cursor.execute(
+        '''
+        SELECT notes, route 
+        FROM activities
+        '''
+    )
+
+    row = cursor.fetchone()
+
+    assert row["notes"] is None
+    assert row["route"] is None
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
