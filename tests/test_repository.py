@@ -99,6 +99,36 @@ def test_create_activity_with_no_optional_fields(repository):
     assert row["notes"] is None
     assert row["route"] is None
 
+def test_get_all_activites_empty(repository):
+    '''Repository should be an empty list.'''
+    activities = repository.get_all_activities()
+
+    assert activities == []
+
+def test_get_all_activities_returns_activity(repository):
+    '''Repository should be a list with one activity.'''
+    activity = Activity(activity_type="run", distance=3, duration=30, notes="Morning", route="Buffalo Creek")
+    repository.create_activity(activity)
+    activities = repository.get_all_activities()
+
+    assert len(activities) == 1
+    loaded = activities[0]
+
+    assert loaded.activity_type == "run"
+    assert loaded.distance == 3
+    assert loaded.duration == 30
+    assert loaded.notes == "Morning"
+    assert loaded.route == "Buffalo Creek"
+    assert loaded.id == activity.id
+
+def test_get_all_activities_multiple(repository):
+    '''Repository should be a list with multiple (2) activities.'''
+    repository.create_activity(Activity(activity_type="run", distance=3, duration=30,))
+    repository.create_activity(Activity(activity_type="walk", distance=2, duration=40,))
+
+    activities = repository.get_all_activities()
+
+    assert len(activities) == 2
 
 if __name__ == "__main__":
     pytest.main([__file__])
