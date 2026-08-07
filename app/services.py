@@ -18,29 +18,35 @@
 
 # Keep the service from having to know every field individually.
 from app.models import Activity
+from app.database import ActivityRepository
 from uuid import UUID
 
 class ActivityService:
     """Coordinates business logic for Activity objects."""
 
-    def __init__(self) -> None:
-        """Initialize the service with temporary in-memory storage."""
-        self.activities: list[Activity] = []
+    # def __init__(self) -> None:
+    #     """Initialize the service with temporary in-memory storage."""
+    #     self.activities: list[Activity] = []
     
+    def __init__(self, repository: ActivityRepository) -> None:
+        '''Initialize the service with an ActivityRepository.'''
+        self.repository = repository
 
     # ---------- Create ----------
 
     def create_activity(self, activity: Activity) -> Activity:
         """Validate and save a new activity."""
         self.validate_activity(activity)
-        self.activities.append(activity)
-        return activity
+        return self.repository.create_activity(activity)
+        # self.activities.append(activity)
+        # return activity
 
     # ---------- Read ----------
 
     def get_all_activities(self) -> list[Activity]:
         """Return every activity."""
-        return self.activities
+        # return self.activities
+        return self.repository.get_all_activities()
 
     def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
         """Return a single activity by its ID."""
