@@ -29,7 +29,16 @@ def test_get_all_activities(service):
     activities = service.get_all_activities()
 
     assert len(activities) == 2
-    
+
+def test_get_activity_by_id(service):
+    activity = Activity(activity_type="run", distance=4, duration=32)
+    service.repository.create_activity(activity)
+
+    found = service.get_activity_by_id(activity.id)
+
+    assert found is not None
+    assert found.id == activity.id
+
 # def test_create_activity():
 #     """A created activity should be stored."""
 

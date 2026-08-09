@@ -90,7 +90,21 @@ class ActivityRepository:
 
     def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
         '''Return a single activity by its ID.'''
-        pass
+        cursor = self.connection.cursor()
+
+        row = cursor.execute(
+            '''
+            SELECT *
+            FROM activities
+            WHERE id = ?
+            ''',
+            (str(activity_id),),
+        ).fetchone()
+
+        if row is None:
+            return None
+        
+        return self._row_to_activity(row)
 
     def update_activity( self, activity_id: UUID, updated_activity: Activity,) -> Activity | None:
         '''Replace an existing activity.'''

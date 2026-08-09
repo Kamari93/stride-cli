@@ -47,22 +47,24 @@ class ActivityService:
         """Return every activity."""
         # return self.activities
         return self.repository.get_all_activities()
-
+    
     def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
         """Return a single activity by its ID."""
+        return self.repository.get_activity_by_id(activity_id)
+    
         # for activity in self.activities:
         #     if activity.id == activity_id:
         #         return activity
         # return None
 
-        result = self._find_activity(activity_id)
+        # result = self._find_activity(activity_id)
 
-        if result is None:
-            return None
+        # if result is None:
+        #     return None
 
-        _, activity = result # decouple and extract activity ignore id as we don't need for this fn
+        # _, activity = result # decouple and extract activity ignore id as we don't need for this fn
 
-        return activity
+        # return activity
         
 
     # ---------- Update ----------

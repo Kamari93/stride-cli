@@ -1,6 +1,7 @@
 import pytest
 from app.database import ActivityRepository
 from app.models import Activity
+from uuid import uuid4
 
 @pytest.fixture
 def repository():
@@ -129,6 +130,26 @@ def test_get_all_activities_multiple(repository):
     activities = repository.get_all_activities()
 
     assert len(activities) == 2
+
+def test_get_activity_by_id(repository):
+    '''Repository should retreive activity by id'''
+    activity = Activity(activity_type="run", distance=4, duration=32)
+    repository.create_activity(activity)
+
+    loaded = repository.get_activity_by_id(activity.id)
+
+    assert loaded is not None
+    assert loaded.id == activity.id
+    assert loaded.activity_type == activity.activity_type
+    assert loaded.distance == activity.distance
+    assert loaded.duration == activity.duration
+
+def test_activity_by_id_not_found(repository):
+    '''Repository should return None if Id not found'''
+    # assert repository.get_activity_by_id(uuid4()) is None
+    loaded = repository.get_activity_by_id(uuid4())
+
+    assert loaded is None
 
 if __name__ == "__main__":
     pytest.main([__file__])
