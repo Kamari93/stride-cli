@@ -169,5 +169,14 @@ def test_update_activity(repository):
     assert loaded.duration == 45
     assert loaded.notes == "Updated run"
 
+def test_update_activity_not_found(repository):
+    '''If id not found Repository should return none'''
+    activity = Activity(activity_type="run", distance=5, duration=40,)
+
+    result = repository.update_activity(uuid4(), activity)
+
+    assert result is None
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
