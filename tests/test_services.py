@@ -60,6 +60,14 @@ def test_update_activity(service):
     assert loaded.distance == 5
     assert loaded.duration == 45
     assert loaded.notes == "Updated"
+
+def test_update_activity_not_found(service):
+    '''Service should return None if id is not found.'''
+    activity = Activity(activity_type="run", distance=5, duration=40,)
+
+    result = service.update_activity(uuid4(), activity)
+
+    assert result is None
 # def test_create_activity():
 #     """A created activity should be stored."""
 
