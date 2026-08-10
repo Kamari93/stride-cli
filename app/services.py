@@ -85,19 +85,30 @@ class ActivityService:
     
     def update_activity(self, activity_id: UUID, updated_activity: Activity) -> Activity | None:
         """Replace an existing activity."""
-        result = self._find_activity(activity_id)
+        existing = self.repository.get_activity_by_id(activity_id)
 
-        if result is None:
+        if existing is None:
             return None
 
-        idx, old_activity = result
+        updated_activity.id = existing.id
+        updated_activity.date = existing.date
 
-        updated_activity.id = old_activity.id
-        updated_activity.date = old_activity.date
+        self.validate_activity(updated_activity)
+        
+        return self.repository.update_activity(activity_id, updated_activity)
+        # result = self._find_activity(activity_id)
 
-        self.activities[idx] = updated_activity
+        # if result is None:
+        #     return None
 
-        return updated_activity
+        # idx, old_activity = result
+
+        # updated_activity.id = old_activity.id
+        # updated_activity.date = old_activity.date
+
+        # self.activities[idx] = updated_activity
+
+        # return updated_activity
 
     # ---------- Delete ----------
 
@@ -121,13 +132,13 @@ class ActivityService:
         return True
 
     # ---------- Find Activity Private Helper ----------
-    def _find_activity(self, activity_id: UUID) -> tuple[int, Activity] | None:
-        '''Return the index and Activity for the given ID. Returns None if the activity is not found.'''
-        for idx, activity in enumerate(self.activities):
-            if activity.id == activity_id:
-                return idx, activity
+    # def _find_activity(self, activity_id: UUID) -> tuple[int, Activity] | None:
+    #     '''Return the index and Activity for the given ID. Returns None if the activity is not found.'''
+    #     for idx, activity in enumerate(self.activities):
+    #         if activity.id == activity_id:
+    #             return idx, activity
         
-        return None
+    #     return None
 
     # ---------- Validation ----------
 

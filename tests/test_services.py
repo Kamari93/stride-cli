@@ -31,6 +31,7 @@ def test_get_all_activities(service):
     assert len(activities) == 2
 
 def test_get_activity_by_id(service):
+    '''Service should return activity by id.'''
     activity = Activity(activity_type="run", distance=4, duration=32)
     service.repository.create_activity(activity)
 
@@ -39,6 +40,26 @@ def test_get_activity_by_id(service):
     assert found is not None
     assert found.id == activity.id
 
+def test_update_activity(service):
+    '''Service should update an existing activity'''
+    activity = Activity(activity_type="run", distance=3, duration=30, notes="Original",)
+    service.create_activity(activity)
+
+    updated_activity = Activity(activity_type="run", distance=5, duration=45, notes="Updated",)
+    result = service.update_activity(activity.id, updated_activity)
+
+    assert result is not None
+    assert result.id == activity.id
+    assert result.distance == 5
+    assert result.duration == 45
+    assert result.notes == "Updated"
+
+    loaded = service.get_activity_by_id(activity.id)
+
+    assert loaded is not None
+    assert loaded.distance == 5
+    assert loaded.duration == 45
+    assert loaded.notes == "Updated"
 # def test_create_activity():
 #     """A created activity should be stored."""
 
