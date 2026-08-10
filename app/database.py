@@ -107,8 +107,40 @@ class ActivityRepository:
         return self._row_to_activity(row)
 
     def update_activity( self, activity_id: UUID, updated_activity: Activity,) -> Activity | None:
-        '''Replace an existing activity.'''
-        pass
+        '''Update an existing activity and return the updated activity.'''
+        existing = self.get_activity_by_id(activity_id)
+
+        if existing is None:
+            return None
+
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            UPDATE activities
+            SET activity_type = ?,
+                distance = ?,
+                duration = ?,
+                date = ?,
+                notes = ?,
+                route = ?
+            WHERE id = ?
+            ''',
+            (
+                updated_activity.activity_type,
+                updated_activity.distance,
+                updated_activity.duration,
+                updated_activity.date.isoformat(),
+                updated_activity.notes,
+                updated_activity.route,
+                str(activity_id)
+            ),
+        )
+
+        self.connection.commit()
+        updated_activity.id = existing.id
+
+        return updated_activity
 
     def delete_activity(self, activity_id: UUID) -> bool:
         '''Delete an activity.'''

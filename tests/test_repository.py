@@ -151,5 +151,23 @@ def test_activity_by_id_not_found(repository):
 
     assert loaded is None
 
+def test_update_activity(repository):
+    '''Repository should successfully update existing activity'''
+    activity = Activity(activity_type="run", distance=3, duration=30, notes="Original run",)
+    repository.create_activity(activity)
+
+    updated_activity = Activity(activity_type="run", distance=5, duration=45, notes="Updated run",)
+    result = repository.update_activity(activity.id, updated_activity)
+
+    assert result is not None
+    assert result.id == activity.id
+
+    loaded = repository.get_activity_by_id(activity.id)
+
+    assert loaded is not None
+    assert loaded.distance == 5
+    assert loaded.duration == 45
+    assert loaded.notes == "Updated run"
+
 if __name__ == "__main__":
     pytest.main([__file__])
