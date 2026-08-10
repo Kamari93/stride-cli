@@ -177,6 +177,21 @@ def test_update_activity_not_found(repository):
 
     assert result is None
 
+def test_delete_activity(repository):
+    '''Repository should delete an existing activity.'''
+    activity = Activity(activity_type="run", distance=3.0, duration=30.0,)
+    repository.create_activity(activity)
+
+    deleted = repository.delete_activity(activity.id)
+
+    assert deleted is True
+    assert repository.get_activity_by_id(activity.id) is None
+
+def test_delete_activity_not_found(repository):
+    '''Repository should return False when the activity does not exist.'''
+    deleted = repository.delete_activity(uuid4())
+
+    assert deleted is False
 
 if __name__ == "__main__":
     pytest.main([__file__])

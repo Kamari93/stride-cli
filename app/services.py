@@ -114,22 +114,23 @@ class ActivityService:
 
     def delete_activity(self, activity_id: UUID) -> bool:
         """Delete an activity."""
+        return self.repository.delete_activity(activity_id)
         # for index, activity in enumerate(self.activities):
         #     if activity.id == activity_id:
         #         self.activities.pop(index)
         #         return True
         # return False
 
-        result = self._find_activity(activity_id)
+        # result = self._find_activity(activity_id)
 
-        if result is None:
-            return False
+        # if result is None:
+        #     return False
 
-        idx, _ = result
+        # idx, _ = result
 
-        self.activities.pop(idx)
+        # self.activities.pop(idx)
 
-        return True
+        # return True
 
     # ---------- Find Activity Private Helper ----------
     # def _find_activity(self, activity_id: UUID) -> tuple[int, Activity] | None:

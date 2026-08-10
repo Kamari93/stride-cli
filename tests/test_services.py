@@ -68,6 +68,27 @@ def test_update_activity_not_found(service):
     result = service.update_activity(uuid4(), activity)
 
     assert result is None
+
+def test_delete_activity(service):
+    '''Service should delete an existing activity.'''
+    activity = Activity(activity_type="run", distance=3.0, duration=30.0,)
+    service.repository.create_activity(activity)
+
+    deleted = service.delete_activity(activity.id)
+
+    assert deleted is True
+    assert service.get_activity_by_id(activity.id) is None
+    assert service.repository.get_activity_by_id(activity.id) is None
+
+def test_delete_activity_not_found(service):
+    '''Service should return False when the activity does not exist.'''
+    deleted = service.delete_activity(uuid4())
+
+    assert deleted is False
+
+if __name__ == "__main__":
+    pytest.main([__file__])
+    
 # def test_create_activity():
 #     """A created activity should be stored."""
 
@@ -165,5 +186,5 @@ def test_update_activity_not_found(service):
     
 #     assert len(service.get_all_activities()) == 7
 
-if __name__ == "__main__":
-    pytest.main([__file__])
+# if __name__ == "__main__":
+#     pytest.main([__file__])

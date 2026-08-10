@@ -143,8 +143,20 @@ class ActivityRepository:
         return updated_activity
 
     def delete_activity(self, activity_id: UUID) -> bool:
-        '''Delete an activity.'''
-        pass
+        '''Delete an activity by ID. Return True if deleted, otherwise False.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            DELETE FROM activities
+            WHERE id = ?
+            ''',
+            (str(activity_id),),
+        )
+
+        self.connection.commit()
+
+        return cursor.rowcount > 0 # SQLite tells us how many rows were affected.
 
     def _row_to_activity(self, row: sqlite3.Row) -> Activity:
         '''Convert a SQLite row into an Activity object.'''
