@@ -233,3 +233,5 @@ Examples:
 Rich separates *what* I want to display from *how* it looks.
 
 Instead of worrying about spacing text manually, I can use components like Panels and Tables.
+
+Statistics determine the data; presentation determines how the data is displayed.
