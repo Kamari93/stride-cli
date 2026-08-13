@@ -9,6 +9,13 @@ from rich import box
 
 from app.models import Activity
 from app.services import ActivityService
+from app.stats import (
+    total_activities,
+    total_distance,
+    total_duration,
+    average_pace,
+    activity_counts
+)
 
 class CLI:
     '''Handles all user interactions.'''
@@ -42,13 +49,14 @@ class CLI:
         self.console.print("2. View Activities")
         self.console.print("3. Edit Activity")
         self.console.print("4. Delete Activity")
-        self.console.print("5. Exit")
+        self.console.print("5. Statistics")
+        self.console.print("6. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3", "4", "5"],
+            choices = ["1", "2", "3", "4", "5", "6"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
@@ -66,8 +74,12 @@ class CLI:
             self.delete_activity()
 
         elif choice == "5":
+            self.show_statistics()
+
+        elif choice == "6":
             self.exit()
 
+    
     def log_activity(self) -> None:
         '''Display the Log Activity screen.'''
         self.console.print("\n[bold]Log Activity[/bold]")
@@ -215,7 +227,38 @@ class CLI:
 
     def show_statistics(self) -> None:
         '''Display activity statistics.'''
-        pass
+        activites = self.activity_service.get_all_activities()
+
+        if not activites:
+            self.show_error("No activities found.")
+            return
+
+        counts = activity_counts(activites)
+        table = Table(
+            title = "Statistics",
+            box = box.ROUNDED,
+            show_header = True,
+            header_style = "bold cyan",
+        )
+
+        table.add_column("Metric")
+        table.add_column("Value")
+
+        table.add_row("Total Activities", str(total_activities(activites)))
+        table.add_row("Total Distance", f"{total_distance(activites):.1f} mi")
+        table.add_row("Total Duration", f"{total_duration(activites):.0f} min")
+
+        pace = average_pace(activites)
+
+        table.add_row("Average Pace", f"{pace:.1f} min/mi" if pace is not None else "-")
+        table.add_row("Walks", str(counts["walk"]))
+        table.add_row("Runs", str(counts["run"]))
+
+        self.console.print()
+        self.console.print(Panel.fit("Activity Summary", title="Statistics", border_style="cyan",))
+        self.console.print(table)
+
+        self.pause()
 
     def show_goals(self) -> None:
         '''Display goal information.'''
