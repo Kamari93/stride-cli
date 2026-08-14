@@ -27,3 +27,33 @@ def activity_counts(activities: list[Activity]) -> dict[str, int]:
         "walk": sum(1 for activity in activities if activity.activity_type == "walk"),
         "run": sum(1 for activity in activities if activity.activity_type == "run"), 
     }
+
+def longest_activity(activities: list[Activity]) -> Activity | None:
+    '''Return the activity with the greatest distance.'''
+    if not activities:
+        return None
+
+    return max(activities, key=lambda activity: activity.distance,)
+
+def longest_run(activities: list[Activity]) -> Activity | None:
+    '''Return the longest run.'''
+    runs = [activity for activity in activities if activity.activity_type == "run"]
+    if not runs:
+        return None
+
+    return max(runs, key=lambda activity: activity.distance)
+
+def longest_walk(activities: list[Activity]) -> Activity | None:
+    '''Return the longest walk.'''
+    walks = [activity for activity in activities if activity.activity_type == "walk"]
+    if not walks:
+        return None
+
+    return max(walks, key=lambda activity: activity.distance)
+
+def fastest_pace(activities: list[Activity],) -> Activity | None:
+    '''Return the activity with the fastest pace.'''
+    if not activities:
+        return None
+
+    return min(activities, key=lambda activity: activity.calculate_pace())

@@ -5,7 +5,11 @@ from app.stats import (
     total_distance,
     total_duration,
     average_pace,
-    activity_counts
+    activity_counts,
+    longest_activity,
+    longest_run,
+    longest_walk,
+    fastest_pace,
 )
 
 def test_total_activities():
@@ -60,6 +64,66 @@ def test_activity_counts_with_no_activities():
         "run": 0,
         "walk": 0,
     }
+
+def test_longest_activity():
+    '''The longest_activity should return the stored activity with the longest recorded distance'''
+    activities = [Activity("run", 3.0, 30.0), Activity("walk", 5.0, 80.0), Activity("run", 2.0, 20.0),]
+    result = longest_activity(activities)
+
+    assert result is not None
+    assert result.distance == 5.0
+
+def test_longest_empty():
+    '''The longest_activity should return None if activities is empty'''
+    result = longest_activity([])
+
+    assert result is None
+
+def test_longest_run():
+    '''The longest_run should return the run activity with longest distance'''
+    activities = activities = [Activity("run", 3.0, 30.0), Activity("run", 6.0, 60.0), Activity("walk", 8.0, 120.0),]
+    result = longest_run(activities)
+
+    assert result is not None
+    assert result.distance == 6.0
+
+def test_longest_run_none():
+    '''The longest_run should return None if there are no run activities in the activities list'''
+    activities = [Activity("walk", 2.0, 40.0), Activity("walk", 3.0, 50.0),]
+    result = longest_run(activities)
+
+    assert result is None
+
+def test_longest_walk():
+    '''The longest_walk should return the walk activity with longest distance'''
+    activities = [Activity("walk", 2.0, 40.0), Activity("walk", 5.0, 90.0), Activity("run", 8.0, 80.0),]
+    result = longest_walk(activities)
+
+    assert result is not None
+    assert result.distance == 5.0
+
+def test_longest_run_none():
+    '''The longest_walk should return None if there are no walk activities in the activities list'''
+    activities = [Activity("run", 3.0, 30.0), Activity("run", 4.0, 40.0),]
+    result = longest_walk(activities)
+
+    assert result is None
+
+def test_fastest_pace():
+    '''The fastest_pace should return the activity with the fastest pace'''
+    activities = [
+        Activity("run", 3.0, 30.0),  # 10 min/mi
+        Activity("run", 4.0, 32.0),  # 8 min/mi
+        Activity("walk", 2.0, 40.0), # 20 min/mi
+        ]
+    result = fastest_pace(activities)
+
+    assert result is not None
+    assert result.calculate_pace() == 8.0
+
+def test_fastest_pace_empty():
+    '''The fastest_pace should return None if the activity list is empty'''
+    assert fastest_pace([]) is None
     
 if __name__ == "main":
     pytest.main([__file__])
