@@ -18,7 +18,9 @@ from app.stats import (
     longest_activity,
     longest_run,
     longest_walk,
-    fastest_pace
+    fastest_pace,
+    weekly_distance,
+    monthly_distance,
 )
 
 class CLI:
@@ -231,13 +233,13 @@ class CLI:
 
     def show_statistics(self) -> None:
         '''Display activity statistics.'''
-        activites = self.activity_service.get_all_activities()
+        activities = self.activity_service.get_all_activities()
 
-        if not activites:
+        if not activities:
             self.show_error("No activities found.")
             return
 
-        counts = activity_counts(activites)
+        counts = activity_counts(activities)
         table = Table(
             title = "Statistics",
             box = box.ROUNDED,
@@ -248,35 +250,42 @@ class CLI:
         table.add_column("Metric")
         table.add_column("Value")
 
-        table.add_row("Total Activities", str(total_activities(activites)))
-        table.add_row("Total Distance", f"{total_distance(activites):.1f} mi")
-        table.add_row("Total Duration", f"{total_duration(activites):.0f} min")
+        table.add_row("Total Activities", str(total_activities(activities)))
+        table.add_row("Total Distance", f"{total_distance(activities):.1f} mi")
+        table.add_row("Total Duration", f"{total_duration(activities):.0f} min")
 
-        pace = average_pace(activites)
+        pace = average_pace(activities)
         minutes = int(pace)
         seconds = round((pace - minutes) * 60)
 
         # table.add_row("Average Pace", f"{pace:.1f} min/mi" if pace is not None else "-")
         table.add_row("Average Pace", f"{minutes}:{seconds:02d} min/mi" if pace is not None else "-")
-        table.add_row("Walks", str(counts["walk"]))
-        table.add_row("Runs", str(counts["run"]))
+        table.add_row("Total Walks", str(counts["walk"]))
+        table.add_row("Total Runs", str(counts["run"]))
 
-        longest = longest_activity(activites)
+        longest = longest_activity(activities)
         if longest:
             table.add_row("Longest Activity", f"{longest.distance:.1f} mi")
 
-        fastest = fastest_pace(activites)
+        fastest = fastest_pace(activities)
         if fastest:
             table.add_row("Fastest Pace", fastest.formatted_pace())
 
-        longest_walk_activity = longest_walk(activites)
+        longest_walk_activity = longest_walk(activities)
         if longest_walk_activity:
             table.add_row("Longest Walk", f"{longest_walk_activity.distance:.1f} mi")
 
-        longest_run_activity = longest_run(activites)
+        longest_run_activity = longest_run(activities)
         if longest_run_activity:
             table.add_row("Longest Run", f"{longest_run_activity.distance:.1f} mi")
 
+        weekly = weekly_distance(activities)
+        if weekly:
+            table.add_row("Weekly Distance", f"{weekly:.1f} mi")
+
+        monthly = monthly_distance(activities)
+        if monthly:
+            table.add_row("Monthly Distance", f"{monthly:.1f} mi")
 
         self.console.print()
         self.console.print(Panel.fit("Activity Summary", title="Statistics", border_style="cyan",))
