@@ -14,7 +14,11 @@ from app.stats import (
     total_distance,
     total_duration,
     average_pace,
-    activity_counts
+    activity_counts,
+    longest_activity,
+    longest_run,
+    longest_walk,
+    fastest_pace
 )
 
 class CLI:
@@ -249,10 +253,30 @@ class CLI:
         table.add_row("Total Duration", f"{total_duration(activites):.0f} min")
 
         pace = average_pace(activites)
+        minutes = int(pace)
+        seconds = round((pace - minutes) * 60)
 
-        table.add_row("Average Pace", f"{pace:.1f} min/mi" if pace is not None else "-")
+        # table.add_row("Average Pace", f"{pace:.1f} min/mi" if pace is not None else "-")
+        table.add_row("Average Pace", f"{minutes}:{seconds:02d} min/mi" if pace is not None else "-")
         table.add_row("Walks", str(counts["walk"]))
         table.add_row("Runs", str(counts["run"]))
+
+        longest = longest_activity(activites)
+        if longest:
+            table.add_row("Longest Activity", f"{longest.distance:.1f} mi")
+
+        fastest = fastest_pace(activites)
+        if fastest:
+            table.add_row("Fastest Pace", fastest.formatted_pace())
+
+        longest_walk_activity = longest_walk(activites)
+        if longest_walk_activity:
+            table.add_row("Longest Walk", f"{longest_walk_activity.distance:.1f} mi")
+
+        longest_run_activity = longest_run(activites)
+        if longest_run_activity:
+            table.add_row("Longest Run", f"{longest_run_activity.distance:.1f} mi")
+
 
         self.console.print()
         self.console.print(Panel.fit("Activity Summary", title="Statistics", border_style="cyan",))
