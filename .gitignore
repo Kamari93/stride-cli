@@ -1,3 +1,23 @@
-#SQLite
+# Python cache
+/__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# macOs
+.DS_Store
+
+# SQLite
 stride.db
 *.db
+
+# Coverage
+.Coverage
+htmlcov/
