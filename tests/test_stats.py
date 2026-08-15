@@ -1,5 +1,6 @@
 import pytest
 from app.models import Activity
+from datetime import datetime, timedelta
 from app.stats import (
     total_activities,
     total_distance,
@@ -10,6 +11,8 @@ from app.stats import (
     longest_run,
     longest_walk,
     fastest_pace,
+    weekly_distance,
+    monthly_distance,
 )
 
 def test_total_activities():
@@ -124,6 +127,57 @@ def test_fastest_pace():
 def test_fastest_pace_empty():
     '''The fastest_pace should return None if the activity list is empty'''
     assert fastest_pace([]) is None
-    
+
+def test_weekly_distance():
+    '''The weekly_distance should sum up the activity distance for the last 7 days'''
+    recent = Activity(activity_type="run", distance=3.0, duration=30,)
+    older = Activity(activity_type="walk", distance=5.0, duration=60,)
+    older.date = datetime.now() - timedelta(days=10)
+
+    result = weekly_distance([recent, older])
+
+    assert result == 3.0
+
+def test_weekly_distance_empty():
+    '''The weekly_distance should return 0 if there were no activities recorded for the last 7 days'''
+    most_recent = Activity(activity_type="run", distance=3.0, duration=30,)
+    older = Activity(activity_type="walk", distance=5.0, duration=60,)
+    most_recent.date = datetime.now() - timedelta(days=9)
+    older.date = datetime.now() - timedelta(days=10)
+
+    result = weekly_distance([most_recent, older])
+
+    assert result == 0
+
+def test_weekly_distance_empty_no_data():
+    '''The weekly_distance should return None if the activities list is empty'''
+    assert weekly_distance([]) is None
+
+
+def test_monthly_distance():
+    '''The monthly_distance should sum up the activity distance for the last 30 days'''
+    recent = Activity(activity_type="run", distance=4.0, duration=40,)
+    older = Activity(activity_type="walk", distance=10.0, duration=100,)
+    older.date = datetime.now() - timedelta(days=45)
+
+    result = monthly_distance([recent, older])
+
+    assert result == 4.0
+
+def test_monthly_distance_empty():
+    '''The monthly_distance should return 0 if there were no activities recorded for the last 30 days'''
+    most_recent = Activity(activity_type="run", distance=4.0, duration=40,)
+    older = Activity(activity_type="walk", distance=10.0, duration=100,)
+    most_recent.date = datetime.now() - timedelta(days=31)
+    older.date = datetime.now() - timedelta(days=45)
+
+    result = monthly_distance([most_recent, older])
+
+    assert result == 0
+
+def test_monthly_distance_empty_no_data():
+    '''The monthly_distance should return None if the activities list is empty'''
+    assert monthly_distance([]) is None
+
 if __name__ == "main":
     pytest.main([__file__])
