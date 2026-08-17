@@ -80,3 +80,48 @@ def monthly_distance(activities: list[Activity], today: datetime | None = None,)
     
     # add up the distance for every activity that happened on or after cutoff date.
     return sum(activity.distance for activity in activities if activity.date >= cutoff)
+
+def current_streak(activities: list[Activity], today: datetime | None = None,) -> int:
+    '''Return the current activity streak in days.'''
+    if not activities:
+        return None
+
+    today = today or datetime.now()
+    activity_dates = {activity.date.date() for activity in activities}
+
+    current_day = today.date()
+
+     # If no activity today, check if they had one yesterday
+    if current_day not in activity_dates:
+        current_day -= timedelta(days=1)
+        if current_day not in activity_dates:
+            return 0
+
+    # Count the streak backwards from the valid starting day
+    streak = 0
+    while current_day in activity_dates:
+        streak += 1
+        current_day -= timedelta(days=1)
+
+    return streak
+
+def longest_streak(activities: list[Activity]) -> int:
+    '''Return the longest activity streak.'''
+    if not activities:
+        return 0
+
+    dates = sorted({activity.date.date() for activity in activities})
+
+    current = 1
+    longest = 1
+
+    for i in range(len(dates)):
+        difference = (dates[i] - dates[i - 1]).days
+
+        if difference == 1:
+            current += 1
+            longest = max(current, longest)
+        else:
+            current = 1
+
+    return longest

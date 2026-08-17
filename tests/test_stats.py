@@ -13,6 +13,8 @@ from app.stats import (
     fastest_pace,
     weekly_distance,
     monthly_distance,
+    current_streak,
+    longest_streak
 )
 
 def test_total_activities():
@@ -178,6 +180,91 @@ def test_monthly_distance_empty():
 def test_monthly_distance_empty_no_data():
     '''The monthly_distance should return None if the activities list is empty'''
     assert monthly_distance([]) is None
+
+def test_current_streak():
+    '''The current_streak should return the current streak if activities are consecutive'''
+    today = datetime.now()
+
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("walk", 2.0, 40.0)
+    a3 = Activity("run", 4.0, 32.0)
+
+    a1.date = today
+    a2.date = today - timedelta(days=1)
+    a3.date = today - timedelta(days=2)
+
+    result = current_streak([a1, a2, a3])
+
+    assert result == 3
+
+def test_current_streak_II():
+    '''The current_streak should return the current streak for activities that are consecutive'''
+    today = datetime.now()
+
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("run", 3.0, 30.0)
+    a3 = Activity("run", 3.0, 30.0)
+    a4 = Activity("run", 3.0, 30.0)
+    a5 = Activity("run", 3.0, 30.0)
+
+    a1.date = today
+
+    a2.date = today - timedelta(days=1)
+    a3.date = today - timedelta(days=2)
+    a4.date = today - timedelta(days=5)
+    a5.date = today - timedelta(days=6)
+
+    assert current_streak([a1, a2, a3, a4, a5]) == 3
+
+def test_current_streak_broken():
+    '''If the streak is broken due to activities not be consecutive current_streak should return 0'''
+    today = datetime.now()
+
+    activity = Activity("run", 3.0, 30.0)
+    activity.date = today - timedelta(days=3)
+
+    assert current_streak([activity]) == 0
+
+def test_current_streak_from_yesterday():
+    '''If the user hasn't logged in activity yet but has a streak going from previous day streak should stay active'''
+    today = datetime.now()
+
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("walk", 2.0, 40.0)
+    a3 = Activity("run", 4.0, 32.0)
+
+    a1.date = today - timedelta(days=1)
+    a2.date = today - timedelta(days=2)
+    a3.date = today - timedelta(days=3)
+
+    result = current_streak([a1, a2, a3])
+
+    assert result == 3
+
+def test_longest_streak():
+    '''The longest_streak should check the entire activities list and return the longest streak for all activities'''
+    today = datetime.now()
+    
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("run", 3.0, 30.0)
+    a3 = Activity("run", 3.0, 30.0)
+    a4 = Activity("run", 3.0, 30.0)
+    a5 = Activity("run", 3.0, 30.0)
+    a6 = Activity("run", 3.0, 30.0)
+
+    a1.date = today
+
+    a2.date = today - timedelta(days=1)
+    a3.date = today - timedelta(days=2)
+    a4.date = today - timedelta(days=5)
+    a5.date = today - timedelta(days=6)
+    a6.date = today - timedelta(days=7)
+
+    assert longest_streak([a1, a2, a3, a4, a5]) == 3
+
+def test_longest_streak_empty():
+    '''longest_streak should return 0 if activities list is empty'''
+    assert longest_streak([]) == 0
 
 if __name__ == "main":
     pytest.main([__file__])

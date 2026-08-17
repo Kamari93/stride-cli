@@ -21,6 +21,8 @@ from app.stats import (
     fastest_pace,
     weekly_distance,
     monthly_distance,
+    current_streak,
+    longest_streak,
 )
 
 class CLI:
@@ -287,6 +289,8 @@ class CLI:
         if monthly:
             table.add_row("Monthly Distance", f"{monthly:.1f} mi")
 
+        table.add_row("Current Streak", f"{current_streak(activities)} days")
+        table.add_row("Longest Streak", f"{longest_streak(activities)} days")
         self.console.print()
         self.console.print(Panel.fit("Activity Summary", title="Statistics", border_style="cyan",))
         self.console.print(table)
