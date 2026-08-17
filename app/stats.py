@@ -62,7 +62,7 @@ def fastest_pace(activities: list[Activity],) -> Activity | None:
 def weekly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
     '''Return distance logged during the current week.'''
     if not activities:
-            return None
+        return 0.0
 
     # date from one week ago
     cutoff = datetime.now() - timedelta(days=7)
@@ -73,7 +73,7 @@ def weekly_distance(activities: list[Activity], today: datetime | None = None,) 
 def monthly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
     '''Return distance logged during the current month.'''
     if not activities:
-            return None
+        return 0.0
 
     # date from one month ago
     cutoff = datetime.now() - timedelta(days=30)

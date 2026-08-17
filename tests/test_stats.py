@@ -152,8 +152,8 @@ def test_weekly_distance_empty():
     assert result == 0
 
 def test_weekly_distance_empty_no_data():
-    '''The weekly_distance should return None if the activities list is empty'''
-    assert weekly_distance([]) is None
+    '''The weekly_distance should return 0 if the activities list is empty'''
+    assert weekly_distance([]) == 0.0
 
 
 def test_monthly_distance():
@@ -178,8 +178,8 @@ def test_monthly_distance_empty():
     assert result == 0
 
 def test_monthly_distance_empty_no_data():
-    '''The monthly_distance should return None if the activities list is empty'''
-    assert monthly_distance([]) is None
+    '''The monthly_distance should return 0 if the activities list is empty'''
+    assert monthly_distance([]) == 0.0
 
 def test_current_streak():
     '''The current_streak should return the current streak if activities are consecutive'''
