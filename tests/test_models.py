@@ -1,5 +1,6 @@
 import pytest
-from app.models import Activity
+from uuid import UUID
+from app.models import Activity, Goal
 
 '''The model is responsible for validation and behavior'''
 
@@ -66,5 +67,46 @@ def test_str_returns_readable_string():
     assert "30 min" in result
     assert "Tempo" in result
 
+
+'''Tests for Goals'''
+def test_create_goal():
+    '''test goal creation'''
+    goal = Goal(goal_type="weekly_distance", target=25.0,)
+
+    assert goal.goal_type == "weekly_distance"
+    assert goal.target == 25.0
+
+def test_goal_invalid_type():
+    '''Test Invalid Goal Type'''
+    with pytest.raises(ValueError):
+        Goal(goal_type="speed_distance", target=25.0,)
+        
+def test_goal_invalid_target():
+    '''Test Invalid Target'''
+    with pytest.raises(ValueError):
+        Goal(goal_type="speed_distance", target=0,)
+
+def test_goal_generate_id():
+    '''Test Goal Generates UUID'''
+    goal = Goal(goal_type="weekly_distance", target=25.0)
+
+    assert isinstance(goal.id, UUID)
+
+def test_goal_str():
+    '''Test Goal String Representation'''
+    goal = Goal(goal_type="weekly_distance", target=25.0)
+
+    assert str(goal) == "Weekly Distance Goal: 25.0"
+
+def test_goal_to_dict():
+    '''Test Goal to_dict'''
+    goal = Goal(goal_type="monthly_distance", target=100.0)
+
+    data = goal.to_dict()
+
+    assert data["goal_type"] == "monthly_distance"
+    assert data["target"] == 100.0
+    assert "id" in data
+    
 if __name__ == "__main__":
     pytest.main([__file__])

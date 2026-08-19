@@ -11,7 +11,7 @@ class Activity:
     distance: float # miles
     duration: float # minutes
     date: datetime = field(default_factory=datetime.now)
-    id: UUID = field(default_factory=uuid4, init=False) # generate its own id automatically w/o CLI
+    id: UUID = field(default_factory=uuid4, init=False) # generate its own id automatically w/o CLI | prevents users from passing ID manually when creating an object
     notes: str | None = None
     route: str | None = None
 
@@ -67,4 +67,37 @@ class Activity:
             "duration": self.duration,
             "notes": self.notes,
             "route": self.route,
+        }
+
+VALID_GOAL_TYPES = (
+    "weekly_distance",
+    "monthly_distance",
+    "current_streak",
+)
+
+@dataclass
+class Goal:
+    '''Represents a fitness goal.'''
+    goal_type: str
+    target: float
+    id: UUID = field(default_factory=uuid4, init=False) # prevents users from passing ID manually when creating an object
+
+    def __post_init__(self) -> None:
+        if self.goal_type not in VALID_GOAL_TYPES:
+            raise ValueError(f"Goal type must be one of {VALID_GOAL_TYPES}")
+
+        if self.target <= 0:
+            raise ValueError("Target must be greater than 0.")
+
+    def __str__(self) -> str:
+        return (
+            f"{self.goal_type.replace("_", " ").title()} "
+            f"Goal: {self.target}"
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "goal_type": self.goal_type,
+            "target": self.target,
         }
