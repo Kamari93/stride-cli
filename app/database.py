@@ -1,7 +1,7 @@
 # Stores and retrieves information. SQLite only.
 # External Library needed -> SQLite (belongs here only) 
 
-from app.models import Activity
+from app.models import Activity, Goal
 from uuid import UUID
 from datetime import datetime
 
@@ -37,6 +37,18 @@ class ActivityRepository:
 
             '''
         )
+
+        cursor.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS goals (
+                id TEXT PRIMARY KEY,
+                goal_type TEXT NOT NULL,
+                target REAL NOT NULL
+            )
+
+            '''
+        )
+
         self.connection.commit()
 
     def close(self) -> None:
@@ -171,3 +183,68 @@ class ActivityRepository:
         activity.date = datetime.fromisoformat(row["date"])
 
         return activity
+
+    def create_goal(self, goal: Goal) -> Goal:
+        """Store a new goal."""
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO goals (
+                id,
+                goal_type,
+                target
+            )
+            VALUES(?, ?, ?)
+            ''',
+            (
+                str(goal.id),
+                goal.goal_type,
+                goal.target
+            ),
+        )
+        self.connection.commit()
+        return goal
+
+    def _row_to_goal(self, row: sqlite3.Row) -> Goal:
+        '''Convert a SQLite row into a Goal object. ORM'''
+        goal = Goal(
+            goal_type=row["goal_type"],
+            target=row["target"],
+        )
+        goal.id = UUID(row["id"])
+
+        return goal
+
+    def get_all_goals(self,) -> list[Goal]:
+        '''Return all stored goals.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            SELECT *
+            FROM goals 
+            '''
+        )
+
+        rows = cursor.fetchall()
+
+        return [self._row_to_goal(row) for row in rows]
+
+    def get_goal_by_id(self, goal_id: UUID) -> Goal | None:
+        '''Return a goal by ID.'''
+        cursor = self.connection.cursor()
+
+        row = cursor.execute(
+            '''
+            SELECT *
+            FROM goals
+            WHERE id=?
+            ''',
+            (str(goal_id),),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        return self._row_to_goal(row)
