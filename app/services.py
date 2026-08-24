@@ -17,7 +17,7 @@
 # - Store application state
 
 # Keep the service from having to know every field individually.
-from app.models import Activity
+from app.models import Activity, Goal
 from app.database import ActivityRepository
 from uuid import UUID
 
@@ -147,3 +147,21 @@ class ActivityService:
         """Validate business rules. Returns True if the activity is valid.
         Raises ValueError if validation fails."""
         return True
+
+class GoalService:
+    '''Coordinates business logic for Goal objects.'''
+    def __init__(self, repository: ActivityRepository) -> None:
+        '''Initialize the service with an ActivityRepository.'''
+        self.repository = repository
+
+    def create_goal(self, goal: Goal) -> Goal:
+        '''Save a new goal.'''
+        return self.repository.create_goal(goal)
+
+    def get_all_goals(self):
+        '''Return every goal.'''
+        return self.repository.get_all_goals()
+
+    def get_goal_by_id(self, goal_id: UUID) -> Goal:
+        '''Return a single goal by its ID.'''
+        return self.repository.get_goal_by_id(goal_id)
