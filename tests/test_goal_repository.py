@@ -41,5 +41,47 @@ def test_get_goal_by_id_not_found(repo):
     result = repo.get_goal_by_id(uuid4())
 
     assert result is None
+
+def test_update_goal(repo):
+    '''Repository should successfully update existing goal'''
+    goal = Goal(goal_type="weekly_distance", target=25.0,)
+    repo.create_goal(goal)
+
+    updated_goal = Goal(goal_type="weekly_distance", target=40.0,)
+    
+    result = repo.update_goal(goal.id, updated_goal)
+
+    assert result is not None
+    assert result.id == goal.id
+    assert result.target == 40.0
+
+    loaded = repo.get_goal_by_id(goal.id)
+
+    assert loaded is not None
+    assert loaded.goal_type == "weekly_distance"
+    assert loaded.target == 40.0
+
+def test_update_goal_not_found(repo):
+    '''Updating a nonexistent goal should return None.'''
+    goal = Goal(goal_type="monthly_distance", target=50.0,)
+    result = repo.update_goal(uuid4(), goal)
+
+    assert result is None
+
+def test_delete_goal(repo):
+    '''An existing goal should be deleted.'''
+    goal = Goal(goal_type="weekly_distance",target=25.0,)
+    repo.create_goal(goal)
+    deleted = repo.delete_goal(goal.id)
+
+    assert deleted is True
+    assert repo.get_goal_by_id(goal.id) is None
+
+def test_delete_goal_not_found(repo):
+    '''Deleting a nonexistent goal should return False.'''
+    deleted = repo.delete_goal(uuid4())
+
+    assert deleted is False
+
 if __name__ == "__main__":
     pytest.main([__file__])

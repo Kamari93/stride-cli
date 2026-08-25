@@ -248,3 +248,48 @@ class ActivityRepository:
             return None
 
         return self._row_to_goal(row)
+
+
+    def update_goal(self, goal_id: UUID, updated_goal: Goal,) -> Goal | None:
+        '''Update an existing goal and return the updated goal.'''
+        existing = self.get_goal_by_id(goal_id)
+
+        if existing is None:
+            return None
+
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            UPDATE goals
+            SET goal_type = ?,
+                target = ?
+            WHERE id = ?
+            ''',
+            (
+                updated_goal.goal_type,
+                updated_goal.target,
+                str(goal_id)
+            ),
+        )
+
+        self.connection.commit()
+        updated_goal.id = existing.id
+
+        return updated_goal
+
+    def delete_goal(self, goal_id: UUID) -> bool:
+        '''Delete a goal by ID.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            DELETE FROM goals
+            WHERE id = ?
+            ''',
+            (str(goal_id),),
+        )
+
+        self.connection.commit()
+
+        return cursor.rowcount > 0 # SQLite tells us how many rows were affected.

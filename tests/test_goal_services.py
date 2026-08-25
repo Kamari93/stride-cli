@@ -49,5 +49,46 @@ def test_get_goal_by_id_not_found(service):
 
     assert not_found is None
 
+def test_update_goal(service):
+    '''Service should update an existing goal.'''
+    goal = Goal(goal_type="weekly_distance", target=25.0,)
+    service.create_goal(goal)
+
+    updated_goal = Goal(goal_type="weekly_distance", target=40.0,)
+    
+    result = service.update_goal(goal.id, updated_goal)
+
+    assert result is not None
+    assert result.id == goal.id
+    assert result.target == 40.0
+
+    loaded = service.get_goal_by_id(goal.id)
+
+    assert loaded is not None
+    assert loaded.goal_type == "weekly_distance"
+    assert loaded.target == 40.0
+
+def test_update_goal_not_found(service):
+    '''Service should return None when updating a nonexistent goal.'''
+    goal = Goal(goal_type="monthly_distance", target=50.0,)
+    result = service.update_goal(uuid4(), goal)
+
+    assert result is None
+
+def test_delete_goal(service):
+    '''Service should delete an existing goal.'''
+    goal = Goal(goal_type="weekly_distance",target=25.0,)
+    service.create_goal(goal)
+    deleted = service.delete_goal(goal.id)
+
+    assert deleted is True
+    assert service.get_goal_by_id(goal.id) is None
+
+def test_delete_goal_not_found(service):
+    '''Service should return False when the goal does not exist.'''
+    deleted = service.delete_goal(uuid4())
+
+    assert deleted is False
+
 if __name__ == "__main__":
     pytest.main([__file__])

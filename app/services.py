@@ -165,3 +165,11 @@ class GoalService:
     def get_goal_by_id(self, goal_id: UUID) -> Goal:
         '''Return a single goal by its ID.'''
         return self.repository.get_goal_by_id(goal_id)
+
+    def update_goal(self, goal_id: UUID, updated_goal: Goal) -> Goal | None:
+        '''Update an existing goal.'''
+        return self.repository.update_goal(goal_id, updated_goal)
+
+    def delete_goal(self, goal_id: UUID) -> bool:
+        '''Delete an existing goal.'''
+        return self.repository.delete_goal(goal_id)
