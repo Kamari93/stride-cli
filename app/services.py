@@ -20,6 +20,9 @@
 from app.models import Activity, Goal
 from app.database import ActivityRepository
 from uuid import UUID
+from datetime import datetime
+
+from app.stats import weekly_distance, monthly_distance, current_streak
 
 class ActivityService:
     """Coordinates business logic for Activity objects."""
@@ -173,3 +176,24 @@ class GoalService:
     def delete_goal(self, goal_id: UUID) -> bool:
         '''Delete an existing goal.'''
         return self.repository.delete_goal(goal_id)
+
+    def get_goal_progress(self, goal: Goal, activities: list[Activity], today: datetime | None = None) -> float:
+        '''Return the current progress toward a goal.'''
+        if goal.goal_type == "weekly_distance":
+            return weekly_distance(activities)
+        if goal.goal_type == "monthly_distance":
+            return monthly_distance(activities)
+        if goal.goal_type == "current_streak":
+            return current_streak(activities, today)
+
+        raise ValueError(f"Unsupported goal type: {goal.goal_type}")
+
+    def get_goal_percentage(self, goal: Goal, activities: list[Activity]) -> float:
+        '''Return percentage of the goal completed.'''
+        progress = self.get_goal_progress(goal, activities)
+
+        return min((progress / goal.target) * 100, 100)
+
+    def is_goal_complete(self, goal: Goal, activities: list[Activity]) ->bool:
+        '''Return True if the goal has been completed.'''
+        return self.get_goal_progress(goal, activities) >= goal.target

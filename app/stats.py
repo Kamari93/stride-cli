@@ -84,7 +84,7 @@ def monthly_distance(activities: list[Activity], today: datetime | None = None,)
 def current_streak(activities: list[Activity], today: datetime | None = None,) -> int:
     '''Return the current activity streak in days.'''
     if not activities:
-        return None
+        return 0.0
 
     today = today or datetime.now()
     activity_dates = {activity.date.date() for activity in activities}
@@ -108,7 +108,7 @@ def current_streak(activities: list[Activity], today: datetime | None = None,) -
 def longest_streak(activities: list[Activity]) -> int:
     '''Return the longest activity streak.'''
     if not activities:
-        return 0
+        return 0.0
 
     dates = sorted({activity.date.date() for activity in activities})
 
