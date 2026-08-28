@@ -22,6 +22,24 @@ def average_pace(activities: list[Activity]) -> float | None:
 
     return sum(activity.calculate_pace() for activity in activities) / len(activities)
 
+def average_walk_pace(activities: list[Activity]) -> float | None:
+    '''Return the average pace for all walk activities.'''
+    walks = [activity for activity in activities if activity.activity_type == "walk"]
+
+    if not walks:
+        return None
+
+    return sum(activity.calculate_pace() for activity in walks) / len(walks)
+
+def average_run_pace(activities: list[Activity]) -> float | None:
+    '''Return the average pace for all run activities.'''
+    runs = [activity for activity in activities if activity.activity_type == "run"]
+
+    if not runs:
+        return None
+
+    return sum(activity.calculate_pace() for activity in runs) / len(runs)
+
 def activity_counts(activities: list[Activity]) -> dict[str, int]:
     '''Return the number of walks and runs.'''
     return {
@@ -58,6 +76,23 @@ def fastest_pace(activities: list[Activity],) -> Activity | None:
         return None
 
     return min(activities, key=lambda activity: activity.calculate_pace())
+
+def fastest_walk_pace(activities: list[Activity],) -> Activity | None:
+    '''Return the walk activity with the fastest pace'''
+    walks = [activity for activity in activities if activity.activity_type == "walk"]
+
+    if not walks:
+        return None
+
+    return min(walks, key=lambda activity: activity.calculate_pace())
+
+def fastest_run_pace(activities: list[Activity],) -> Activity | None:
+    '''Return the run activity with the fastest pace'''
+    runs = [activity for activity in activities if activity.activity_type == "run"]
+    if not runs:
+        return None
+
+    return min(runs, key=lambda activity: activity.calculate_pace())
 
 def weekly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
     '''Return distance logged during the current week.'''

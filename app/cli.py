@@ -23,6 +23,10 @@ from app.stats import (
     monthly_distance,
     current_streak,
     longest_streak,
+    average_walk_pace,
+    average_run_pace,
+    fastest_walk_pace,
+    fastest_run_pace,
 )
 
 class CLI:
@@ -260,8 +264,18 @@ class CLI:
         minutes = int(pace)
         seconds = round((pace - minutes) * 60)
 
+        walk_pace = average_walk_pace(activities)
+        walk_minutes = int(walk_pace)
+        walk_seconds = round((walk_pace - walk_minutes) * 60)
+
+        run_pace = average_run_pace(activities)
+        run_minutes = int(run_pace)
+        run_seconds = round((run_pace - run_minutes) * 60)
+
         # table.add_row("Average Pace", f"{pace:.1f} min/mi" if pace is not None else "-")
         table.add_row("Average Pace", f"{minutes}:{seconds:02d} min/mi" if pace is not None else "-")
+        table.add_row("Average Walk Pace", f"{walk_minutes}:{walk_seconds:02d} min/mi" if walk_pace is not None else "-")
+        table.add_row("Average Run Pace", f"{run_minutes}:{run_seconds:02d} min/mi" if run_pace is not None else "-")
         table.add_row("Total Walks", str(counts["walk"]))
         table.add_row("Total Runs", str(counts["run"]))
 
@@ -272,6 +286,14 @@ class CLI:
         fastest = fastest_pace(activities)
         if fastest:
             table.add_row("Fastest Pace", fastest.formatted_pace())
+
+        fastest_walk = fastest_walk_pace(activities)
+        if fastest_walk:
+            table.add_row("Fastest Walk Pace", fastest_walk.formatted_pace())
+
+        fastest_run = fastest_run_pace(activities)
+        if fastest_run:
+            table.add_row("Fastest Run Pace", fastest_run.formatted_pace())
 
         longest_walk_activity = longest_walk(activities)
         if longest_walk_activity:

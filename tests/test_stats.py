@@ -14,7 +14,11 @@ from app.stats import (
     weekly_distance,
     monthly_distance,
     current_streak,
-    longest_streak
+    longest_streak,
+    average_walk_pace,
+    average_run_pace,
+    fastest_walk_pace,
+    fastest_run_pace
 )
 
 def test_total_activities():
@@ -49,6 +53,34 @@ def test_average_pace_with_no_activities():
     activities = []
 
     assert average_pace(activities) == None 
+
+def test_average_walk_pace():
+    '''The average_walk_pace function should succsessfully calculate the average pace of all walk activities'''
+    activities = [Activity("run", 3.0, 30.0), Activity("walk", 2.0, 40.0), Activity("walk", 3.0, 30.0)]
+
+    # 10 min/mile and 20 min/mile
+    # Average = 15 min/mile
+    assert average_walk_pace(activities) == 15.0
+
+def test_average_walk_pace_with_no_activities():
+    '''The average_walk_pace function should return None if activities array is empty'''
+    activities = []
+
+    assert average_walk_pace(activities) is None
+
+def test_average_run_pace():
+    '''The average_run_pace function should succsessfully calculate the average pace of all walk activities'''
+    activities = [Activity("run", 3.0, 30.0), Activity("run", 2.0, 40.0), Activity("walk", 3.0, 30.0)]
+
+    # 10 min/mile and 20 min/mile
+    # Average = 15 min/mile
+    assert average_run_pace(activities) == 15.0
+
+def test_average_run_pace_with_no_activities():
+    '''The average_run_pace function should return None if activities array is empty'''
+    activities = []
+
+    assert average_run_pace(activities) is None
 
 def test_activity_counts():
     '''The activity_count function should accurately count the total number for each activity_type and return a dictionary with proper calculations'''
@@ -129,6 +161,40 @@ def test_fastest_pace():
 def test_fastest_pace_empty():
     '''The fastest_pace should return None if the activity list is empty'''
     assert fastest_pace([]) is None
+
+def test_fastest_walk_pace():
+    '''The fastest_walk_pace should return the walk activity with the fastest pace'''
+    activities = [
+        Activity("run", 3.0, 30.0),  # 10 min/mi
+        Activity("run", 4.0, 32.0),  # 8 min/mi
+        Activity("walk", 2.0, 40.0), # 20 min/mi
+        Activity("walk", 2.0, 30.0), # 15 min/mi
+        ]
+    result = fastest_walk_pace(activities)
+
+    assert result is not None
+    assert result.calculate_pace() == 15.0
+
+def test_fastest_walk_pace_empty():
+    '''The fastest_walk_pace should return None if the activity list is empty'''
+    assert fastest_walk_pace([]) is None
+
+def test_fastest_run_pace():
+    '''The fastest_run_pace should return the run activity with the fastest pace'''
+    activities = [
+        Activity("run", 3.0, 21.0),  # 7 min/mi
+        Activity("run", 4.0, 32.0),  # 8 min/mi
+        Activity("walk", 2.0, 40.0), # 20 min/mi
+        Activity("walk", 2.0, 30.0), # 15 min/mi
+        ]
+    result = fastest_run_pace(activities)
+
+    assert result is not None
+    assert result.calculate_pace() == 7.0
+
+def test_fastest_run_pace_empty():
+    '''The fastest_run_pace should return None if the activity list is empty'''
+    assert fastest_run_pace([]) is None
 
 def test_weekly_distance():
     '''The weekly_distance should sum up the activity distance for the last 7 days'''
