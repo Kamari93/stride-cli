@@ -73,6 +73,7 @@ VALID_GOAL_TYPES = (
     "weekly_distance",
     "monthly_distance",
     "current_streak",
+    "longest_streak",
 )
 
 @dataclass

@@ -153,6 +153,32 @@ def test_goal_progress_current_streak_broken(service):
 
     assert progress == 2
 
+def test_get_goal_progress_longest_streak(service):
+    """Service should calculate progress for a longest streak goal."""
+    goal = Goal(goal_type="longest_streak", target=10.0)
+    today = datetime(2026, 8, 27)
+
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("walk", 3.0, 30.0)
+    a3 = Activity("run", 3.0, 30.0)
+    a4 = Activity("walk", 3.0, 30.0)
+    a5 = Activity("run", 3.0, 30.0)
+    a6 = Activity("walk", 3.0, 30.0)
+
+    a1.date = today
+
+    a2.date = today - timedelta(days=1)
+    a3.date = today - timedelta(days=2)
+    a4.date = today - timedelta(days=5)
+    a5.date = today - timedelta(days=6)
+    a6.date = today - timedelta(days=8)
+
+    activities = [a1, a2, a3, a4, a5, a6]
+
+    progress = service.get_goal_progress(goal, activities)
+
+    assert progress == 3
+
 def test_get_goal_percentage(service):
     '''Service should calculate goal completion percentage.'''
     goal = Goal(goal_type="weekly_distance", target=20.0)
@@ -186,6 +212,31 @@ def test_is_goal_complete_streak(service):
 
     assert complete is True
 
+def test_is_goal_complete_longest_streak(service):
+    '''Service should identify a completed longest streak goal.'''
+    goal = Goal(goal_type="longest_streak", target=3.0)
+    today = datetime(2026, 8, 27)
+
+    a1 = Activity("run", 3.0, 30.0)
+    a2 = Activity("walk", 3.0, 30.0)
+    a3 = Activity("run", 3.0, 30.0)
+    a4 = Activity("walk", 3.0, 30.0)
+    a5 = Activity("run", 3.0, 30.0)
+    a6 = Activity("walk", 3.0, 30.0)
+
+    a1.date = today
+
+    a2.date = today - timedelta(days=1)
+    a3.date = today - timedelta(days=2)
+    a4.date = today - timedelta(days=5)
+    a5.date = today - timedelta(days=6)
+    a6.date = today - timedelta(days=8)
+
+    activities = [a1, a2, a3, a4, a5, a6]
+
+    complete = service.is_goal_complete(goal, activities)
+    
+    assert complete is True
 
 def test_is_goal_complete_returns_false(service):
     '''Service should identify an incomplete goal.'''

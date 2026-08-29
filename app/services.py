@@ -22,7 +22,7 @@ from app.database import ActivityRepository
 from uuid import UUID
 from datetime import datetime
 
-from app.stats import weekly_distance, monthly_distance, current_streak
+from app.stats import weekly_distance, monthly_distance, current_streak, longest_streak
 
 class ActivityService:
     """Coordinates business logic for Activity objects."""
@@ -185,6 +185,8 @@ class GoalService:
             return monthly_distance(activities)
         if goal.goal_type == "current_streak":
             return current_streak(activities, today)
+        if goal.goal_type == "longest_streak":
+            return longest_streak(activities)
 
         raise ValueError(f"Unsupported goal type: {goal.goal_type}")
 

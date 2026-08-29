@@ -324,9 +324,9 @@ def test_longest_streak():
     a3.date = today - timedelta(days=2)
     a4.date = today - timedelta(days=5)
     a5.date = today - timedelta(days=6)
-    a6.date = today - timedelta(days=7)
+    a6.date = today - timedelta(days=8)
 
-    assert longest_streak([a1, a2, a3, a4, a5]) == 3
+    assert longest_streak([a1, a2, a3, a4, a5, a6]) == 3
 
 def test_longest_streak_empty():
     '''longest_streak should return 0 if activities list is empty'''
