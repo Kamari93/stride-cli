@@ -424,10 +424,10 @@ class CLI:
     def create_goal(self,) -> None:
         '''Create a new goal through the CLI.'''
         self.console.print("\n[bold]Create Goal Menu[/bold]")
-        self.console.print("1. Weekly Distance")
-        self.console.print("2. Monthly Distance")
-        self.console.print("3. Current Streak")
-        self.console.print("4. Longest Streak")
+        self.console.print("1. Weekly Distance Goal")
+        self.console.print("2. Monthly Distance Goal")
+        self.console.print("3. Current Streak Goal")
+        self.console.print("4. Longest Streak Goal")
         self.console.print("5. Cancel")
 
         choice = Prompt.ask("Goal Type", choices = ["1", "2", "3", "4", "5"],)
