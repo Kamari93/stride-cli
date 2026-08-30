@@ -7,8 +7,8 @@ from rich.prompt import Prompt
 from rich.table import Table
 from rich import box
 
-from app.models import Activity
-from app.services import ActivityService
+from app.models import Activity, Goal
+from app.services import ActivityService, GoalService
 from app.stats import (
     total_activities,
     total_distance,
@@ -31,9 +31,10 @@ from app.stats import (
 
 class CLI:
     '''Handles all user interactions.'''
-    def __init__(self, activity_service: ActivityService) -> None:
+    def __init__(self, activity_service: ActivityService, goal_service: GoalService) -> None:
         self.console = Console()
         self.activity_service = activity_service
+        self.goal_service = goal_service
         self.running = True
     
     def run(self) -> None:
@@ -62,13 +63,14 @@ class CLI:
         self.console.print("3. Edit Activity")
         self.console.print("4. Delete Activity")
         self.console.print("5. Statistics")
-        self.console.print("6. Exit")
+        self.console.print("6. Goals")
+        self.console.print("7. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3", "4", "5", "6"],
+            choices = ["1", "2", "3", "4", "5", "6", "7"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
@@ -89,6 +91,9 @@ class CLI:
             self.show_statistics()
 
         elif choice == "6":
+            self.show_goals_menu()
+
+        elif choice == "7":
             self.exit()
 
     
@@ -139,7 +144,7 @@ class CLI:
             self.console.print("[yellow]No activities logged yet.[/yellow]")
             return
         
-        table = Table(show_header=True, title="Activities", header_style="bold green", box=box.ROUNDED)
+        table = Table(show_header=True, title="Activities", header_style="bold green", box=box.ROUNDED, show_lines=True,)
         table.add_column("#")
         table.add_column("Type")
         table.add_column("Distance")
@@ -251,6 +256,7 @@ class CLI:
             box = box.ROUNDED,
             show_header = True,
             header_style = "bold cyan",
+            show_lines=True,
         )
 
         table.add_column("Metric")
@@ -319,9 +325,138 @@ class CLI:
 
         self.pause()
 
+    def show_goals_menu(self) -> None:
+        '''Display the goals menu.'''
+        while True:
+            self.console.print("\n[bold]Goals Menu[/bold]")
+            self.console.print("1. View Goals")
+            self.console.print("2. Create Goal")
+            self.console.print("3. Edit Goal")
+            self.console.print("4. Delete Goal")
+            self.console.print("5. Back To Main")
+
+            choice = Prompt.ask("Choose an option", choices=["1", "2", "3", "4", "5"])
+
+            if choice == "1":
+                self.show_goals()
+            if choice == "2":
+                self.create_goal()
+            if choice == "3":
+                pass
+            if choice == "4":
+                pass
+            if choice == "5":
+                return
+
     def show_goals(self) -> None:
-        '''Display goal information.'''
-        pass
+        '''Display all goals and their progress.'''
+        goals = self.goal_service.get_all_goals()
+        activities = self.activity_service.get_all_activities()
+
+        if not goals:
+            self.show_error("No goals found.")
+            self.pause()
+            return
+
+        table = Table(
+            title = "Goals",
+            box = box.ROUNDED,
+            show_header = True,
+            header_style = "bold cyan",
+            show_lines=True,
+        )
+
+        table.add_column("Goal")
+        table.add_column("Target")
+        table.add_column("Progress")
+        table.add_column("Completion")
+        table.add_column("Progress Bar")
+        table.add_column("Status")
+
+        for goal in goals:
+            progress = self.goal_service.get_goal_progress(goal, activities)
+            percentage = self.goal_service.get_goal_percentage(goal, activities)
+            complete = self.goal_service.is_goal_complete(goal, activities)
+
+            goal_name = goal.goal_type.replace("_", " ").title()
+
+            if goal.goal_type in ("weekly_distance", "monthly_distance"):
+                target_text = f"{goal.target:.1f} mi"
+                progress_text = f"{progress:.1f} mi"
+
+            if goal.goal_type in ("current_streak", "longest_streak"):
+                target_text = f"{goal.target:.0f} days"
+                progress_text = f"{progress:.0f} days"
+
+            else:
+                target_text = str(goal.target)
+                progress_text = str(progress)
+
+            status = ("[green]✓ Complete[/green]" if complete else "[yellow]In Progress[/yellow]")
+            progress_bar = self.create_goal_progress_bar(percentage)
+
+            table.add_row(
+                goal_name,
+                target_text,
+                progress_text,
+                f"{percentage:.0f}%",
+                f"{progress_bar}",
+                status,
+            )
+
+        self.console.print()
+        self.console.print(
+            Panel.fit("Track your progress toward your goals.", title="Goals", border_style="cyan",)
+        )
+        self.console.print(table)
+        self.pause()
+
+    def create_goal_progress_bar(self, percentage: float) -> str:
+        '''Return a simple visual progress bar.'''
+        width = 20
+        percentage = min(percentage, 100)
+
+        completed = round(width * percentage / 100)
+        remaining = width - completed
+
+        return completed * "█" + remaining * "░"
+
+    def create_goal(self,) -> None:
+        '''Create a new goal through the CLI.'''
+        self.console.print("\n[bold]Create Goal Menu[/bold]")
+        self.console.print("1. Weekly Distance")
+        self.console.print("2. Monthly Distance")
+        self.console.print("3. Current Streak")
+        self.console.print("4. Longest Streak")
+        self.console.print("5. Cancel")
+
+        choice = Prompt.ask("Goal Type", choices = ["1", "2", "3", "4", "5"],)
+
+        if choice == "1":
+            goal_type = "weekly_distance"
+        if choice == "2":
+            goal_type = "monthly_distance"
+        if choice == "3":
+            goal_type = "current_streak"
+        if choice == "4":
+            goal_type = "longest_streak"
+        if choice == "5":
+            return
+
+
+        target = self.prompt_for_float("Target")
+
+        try:
+            goal = Goal(goal_type, target)
+            self.goal_service.create_goal(goal)
+        except ValueError as e:
+            self.show_error(str(e))
+            self.pause()
+            return
+
+        self.show_success("Goal created successfully!")
+        self.pause()
+
 
     def show_error(self, msg: str) -> None:
         '''Display an error message.'''

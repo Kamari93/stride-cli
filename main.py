@@ -1,13 +1,14 @@
 # Starts the application.
 from app.cli import CLI 
-from app.services import ActivityService
+from app.services import ActivityService, GoalService
 from app.database import ActivityRepository
 
 def main() -> None:
     repository = ActivityRepository()
     # activity_service = ActivityService()
     activity_service = ActivityService(repository)
-    cli = CLI(activity_service)
+    goal_service = GoalService(repository)
+    cli = CLI(activity_service, goal_service)
     cli.run()
 
 
