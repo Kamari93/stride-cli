@@ -342,7 +342,7 @@ class CLI:
             if choice == "2":
                 self.create_goal()
             if choice == "3":
-                pass
+                self.edit_goal()
             if choice == "4":
                 pass
             if choice == "5":
@@ -457,6 +457,86 @@ class CLI:
         self.show_success("Goal created successfully!")
         self.pause()
 
+    def edit_goal(self) -> None:
+        '''Edit an existing goal.'''
+        goals = self.goal_service.get_all_goals()
+
+        if not goals:
+            self.show_error("No goals found.")
+            self.pause()
+            return
+
+        self.display_goals()
+
+        choice = self.prompt_for_int("Select activity number (0 to cancel)")
+        
+        if choice == 0:
+            return None
+
+        if not 1 <= choice <= len(goals):
+            self.show_error("Invalid goal number.")
+            self.pause()
+            return
+
+        goal = goals[choice - 1]
+
+        self.console.print("\n[bold]Edit Goal[/bold]")
+
+        target = self.prompt_for_optional_float(f"Target: {goal.target}")
+
+        updated_goal = Goal(goal.goal_type, (target if target is not None else goal.target))
+
+        try:
+            result = self.goal_service.update_goal(goal.id, updated_goal)
+        except ValueError as e:
+            self.show_error(str(e))
+            self.pause
+            return
+
+        if result is None:
+            self.show_error("Goal could not be updated.")
+            self.pause()
+            return
+        
+        self.show_success("Goal updated successfully!")
+        self.pause()
+
+
+    def display_goals(self) -> None:
+        '''Display goals in a simple selection table.'''
+        goals = self.goal_service.get_all_goals()
+
+        if not goals:
+            self.console.print("[yellow]No goals found.[/yellow]")
+            return
+
+        table = Table(
+            title = "Goals",
+            box = box.ROUNDED,
+            show_header = True,
+            header_style = "bold cyan",
+            show_lines=True,
+        )
+
+        table.add_column("#")
+        table.add_column("Goal")
+        table.add_column("Target")
+
+        for idx, goal in enumerate(goals, start=1):
+            goal_name = goal.goal_type.replace("_", " ").title()
+
+            if goal.goal_type in ("weekly_distance", "monthly_distance"):
+                target_text = f"{goal.target:.1f} mi"
+            else:
+                target_text = f"{goal.target:.0f} days"
+
+            table.add_row(
+                str(idx),
+                goal_name,
+                target_text,
+                )
+
+        self.console.print(table)
 
     def show_error(self, msg: str) -> None:
         '''Display an error message.'''
