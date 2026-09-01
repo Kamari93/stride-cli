@@ -344,7 +344,7 @@ class CLI:
             if choice == "3":
                 self.edit_goal()
             if choice == "4":
-                pass
+                self.delete_goal()
             if choice == "5":
                 return
 
@@ -502,6 +502,52 @@ class CLI:
         self.pause()
 
 
+
+    def delete_goal(self) -> None:
+        '''Delete an existing goal.'''
+        goals = self.goal_service.get_all_goals()
+        
+        if not goals:
+            self.show_error("No goals found.")
+            self.pause()
+            return
+
+        self.display_goals()
+
+        choice = self.prompt_for_int("Select activity number (0 to cancel)")
+        
+        if choice == 0:
+            return None
+
+        if not 1 <= choice <= len(goals):
+            self.show_error("Invalid goal number.")
+            self.pause()
+            return
+
+        goal = goals[choice - 1]
+        goal_name = goal.goal_type.replace("_", " ").title()
+
+        self.console.print(
+            f"\n[bold red]You are about to delete:[/bold red]\n"
+            f"Goal: {goal_name} - {goal.target}"
+        )
+
+        confirm = Prompt.ask("\nAre you sure you want to delete this goal?", choices=["y", "n"], default="n")
+        
+        if confirm == "n":
+            self.console.print("[yellow]Deletion cancelled[/yellow]")
+            self.pause()
+            return
+
+        deleted = self.goal_service.delete_goal(goal.id)
+
+        if deleted:
+            self.show_success("Goal deleted successfully!")
+        else:
+            self.show_error("Goal could not be deleted.")
+
+        self.pause()
+
     def display_goals(self) -> None:
         '''Display goals in a simple selection table.'''
         goals = self.goal_service.get_all_goals()
@@ -535,7 +581,7 @@ class CLI:
                 goal_name,
                 target_text,
                 )
-
+        self.console.print()
         self.console.print(table)
 
     def show_error(self, msg: str) -> None:
