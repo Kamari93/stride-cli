@@ -94,11 +94,11 @@ class CLI:
         elif choice == "6":
             self.show_goals_menu()
 
-        elif choice == "":
+        elif choice == "7":
             self.export_activities()
 
-        elif choice == "7":
-                self.exit()
+        elif choice == "8":
+            self.exit()
 
     
     def log_activity(self) -> None:
