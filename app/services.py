@@ -21,6 +21,8 @@ from app.models import Activity, Goal
 from app.database import ActivityRepository
 from uuid import UUID
 from datetime import datetime
+from pathlib import Path
+from app.export import export_activities_to_csv
 
 from app.stats import weekly_distance, monthly_distance, current_streak, longest_streak
 
@@ -151,6 +153,13 @@ class ActivityService:
         Raises ValueError if validation fails."""
         return True
 
+    def export_activities(self, filepath: str | Path) -> None:
+        '''Export all activities to a CSV file.'''
+        actvities = self.get_all_activities()
+
+        export_activities_to_csv(actvities, filepath)
+
+
 class GoalService:
     '''Coordinates business logic for Goal objects.'''
     def __init__(self, repository: ActivityRepository) -> None:
@@ -196,6 +205,6 @@ class GoalService:
 
         return min((progress / goal.target) * 100, 100)
 
-    def is_goal_complete(self, goal: Goal, activities: list[Activity]) ->bool:
+    def is_goal_complete(self, goal: Goal, activities: list[Activity]) -> bool:
         '''Return True if the goal has been completed.'''
         return self.get_goal_progress(goal, activities) >= goal.target

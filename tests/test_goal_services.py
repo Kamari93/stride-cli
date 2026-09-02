@@ -112,7 +112,8 @@ def test_get_goal_progress_monthly_distance(service):
 def test_get_goal_progress_current_streak(service):
     """Service should calculate progress for a current streak goal."""
     goal = Goal(goal_type="current_streak", target=15.0)
-    today = datetime(2026, 8, 27)
+    # today = datetime(2026, 9, 1)
+    today = datetime.now()
 
     activities = [Activity("run", 3.0, 30.0,), Activity("run", 10.0, 100), Activity("walk", 5.0, 60)]
     activities[0].date = today
@@ -141,7 +142,8 @@ def test_goal_progress_current_streak_no_activity_today(service):
 def test_goal_progress_current_streak_broken(service):
     '''Current streak should stop when there is a missing day.'''
     goal = Goal(goal_type="current_streak", target=5,)
-    today = datetime(2026, 8, 27)
+    today = datetime(2026, 9, 1)
+    # today = datetime.now()
 
     activities = [Activity("run", 3.0, 30.0), Activity("run", 3.0, 30.0), Activity("run", 3.0, 30.0)]
 
@@ -200,7 +202,8 @@ def test_is_goal_complete(service):
 def test_is_goal_complete_streak(service):
     '''Service should identify a completed streak goal.'''
     goal = Goal(goal_type="current_streak", target=3)
-    today = datetime(2026, 8, 27)
+    # today = datetime(2026, 9, 1)
+    today = datetime.now()
 
     activites = [Activity(activity_type="walk", distance=10, duration=120), Activity(activity_type="run", distance=5, duration=50), Activity(activity_type="walk", distance=5, duration=60)]
     activites[0].date = today

@@ -64,13 +64,14 @@ class CLI:
         self.console.print("4. Delete Activity")
         self.console.print("5. Statistics")
         self.console.print("6. Goals")
-        self.console.print("7. Exit")
+        self.console.print("7. Export Activities")
+        self.console.print("8. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3", "4", "5", "6", "7"],
+            choices = ["1", "2", "3", "4", "5", "6", "7", "8"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
@@ -93,8 +94,11 @@ class CLI:
         elif choice == "6":
             self.show_goals_menu()
 
+        elif choice == "":
+            self.export_activities()
+
         elif choice == "7":
-            self.exit()
+                self.exit()
 
     
     def log_activity(self) -> None:
@@ -501,8 +505,6 @@ class CLI:
         self.show_success("Goal updated successfully!")
         self.pause()
 
-
-
     def delete_goal(self) -> None:
         '''Delete an existing goal.'''
         goals = self.goal_service.get_all_goals()
@@ -583,6 +585,30 @@ class CLI:
                 )
         self.console.print()
         self.console.print(table)
+
+    def export_activities(self) -> None:
+        '''Export activities to a CSV file.'''
+        activities = self.activity_service.get_all_activities()
+
+        if not activities:
+            self.show_error("No activities found to export.")
+            self.pause()
+            return
+
+        filepath = Prompt.ask("Enter CSV File", default="activities.csv").strip()
+
+        if not filepath:
+            filepath = "activities.csv"
+
+        try:
+            self.activity_service.export_activities(filepath)
+        except OSError as e:
+            self.show_error(f"Could not export activities: {e}")
+            self.pause()
+            return
+
+        self.show_success(f"Activities exported successfully to {filepath}")
+        self.pause()
 
     def show_error(self, msg: str) -> None:
         '''Display an error message.'''

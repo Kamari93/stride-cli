@@ -86,6 +86,24 @@ def test_delete_activity_not_found(service):
 
     assert deleted is False
 
+def test_export_activities(service, tmp_path):
+    '''Service should export stored activities to CSV.'''
+    activity = Activity(activity_type="run", distance=3.0, duration=30.0,)
+
+    service.create_activity(activity)
+
+    filepath = tmp_path/"activities.csv"
+    service.export_activities(filepath)
+
+    assert filepath.exists()
+
+    content = filepath.read_text(encoding="utf-8")
+
+    assert "activity_type" in content
+    assert "run" in content
+    assert "3.0" in content
+    assert "30.0" in content
+
 if __name__ == "__main__":
     pytest.main([__file__])
     
