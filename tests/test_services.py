@@ -4,6 +4,7 @@ from uuid import uuid4
 from app.models import Activity
 from app.services import ActivityService
 from app.database import ActivityRepository
+from datetime import datetime
 
 @pytest.fixture
 def service():
@@ -103,6 +104,74 @@ def test_export_activities(service, tmp_path):
     assert "run" in content
     assert "3.0" in content
     assert "30.0" in content
+
+def test_sort_activities_by_distance(service):
+    '''Activities should be sorted by distance.'''
+    activites = [Activity("run", 5, 50), Activity("walk", 2, 40), Activity("run", 8, 80)]
+    result = service.sort_activities(activites, "distance")
+
+    assert [activity.distance for activity in result] == [2, 5, 8]
+
+def test_sort_activities_by_distance_descending(service):
+    '''Activities should be sorted by distance descending.'''
+    activites = [Activity("run", 5, 50), Activity("walk", 2, 40), Activity("run", 8, 80)]
+    result = service.sort_activities(activites, "distance", True)
+
+    assert [activity.distance for activity in result] == [8, 5, 2]
+
+def test_sort_activities_by_duration(service):
+    '''Activities should be sorted by duration.'''
+    activities = [Activity("run", 30, 60), Activity("walk", 2, 20), Activity("run", 5, 45)]
+    result = service.sort_activities(activities, "duration")
+
+    assert [activity.duration for activity in result] == [20, 45, 60]
+
+def test_sort_activities_by_pace(service):
+    '''Activities should be sorted by pace.'''
+    activities = [
+        Activity("run", 3, 30), # pace is 10 min/mi
+        Activity("walk", 4, 32), # pace is 8 min/mi
+        Activity("run", 2, 40),  # pace is 20 min/mi
+        ]
+    result = service.sort_activities(activities, "pace")
+
+    assert [activity.calculate_pace() for activity in result] == [8, 10, 20]
+
+def test_sort_activities_by_date(service):
+    '''Activities should be sorted by date.'''
+    older = Activity("run", 3, 30)
+    middle = Activity("run", 4, 40)
+    newer = Activity("walk", 2, 30)
+
+    # today = datetime.now()
+    older.date = datetime(2026, 1, 1)
+    middle.date = datetime(2026, 2, 1)
+    newer.date = datetime(2026, 3, 1)
+
+    activities = [older, middle, newer]
+
+    result = service.sort_activities(activities, "date")
+
+    assert result == [older, middle, newer]
+
+def test_sort_activities_invalid_field(service):
+    '''Invalid sort fields should raise ValueError.'''
+    activities = [Activity("run", 3, 30)]
+
+    with pytest.raises(ValueError):
+        service.sort_activities(activities, "invalid")
+
+def test_sort_activities_doesnt_modify_original_list(service):
+    '''Sorting should return a new list without changing the original.'''
+    activity_1 = Activity("run", 5, 50)
+    activity_2 = Activity("walk", 2, 40)
+
+    activities = [activity_1, activity_2]
+
+    result = service.sort_activities(activities, "distance")
+
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_2, activity_1]
 
 if __name__ == "__main__":
     pytest.main([__file__])

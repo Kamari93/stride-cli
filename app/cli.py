@@ -140,9 +140,9 @@ class CLI:
         self.show_success("Activity logged successfully!")
         self.pause()
 
-    def display_activities(self) -> None:
+    def display_activities(self, activities: list[Activity]) -> None:
         '''Display all recorded activities in a table'''
-        activities = self.activity_service.get_all_activities()
+        # activities = self.activity_service.get_all_activities()
 
         if not activities:
             self.console.print("[yellow]No activities logged yet.[/yellow]")
@@ -174,10 +174,35 @@ class CLI:
         self.console.print("\n")
         self.console.print(table)
 
+    # def show_activities(self) -> None:
+    #     '''Display activities and wait for the user.'''
+    #     # self.console.print("\n[bold]Activities[/bold]")
+    #     self.display_activities()
+    #     self.pause()
+
     def show_activities(self) -> None:
-        '''Display activities and wait for the user.'''
-        # self.console.print("\n[bold]Activities[/bold]")
-        self.display_activities()
+        '''Display activities and optionally sort them.'''
+        activities = self.activity_service.get_all_activities()
+
+        if not activities:
+            self.console.print("[yellow]No activities logged yet.[/yellow]")
+            self.pause()
+            return
+
+        sort_choice = Prompt.ask(
+            "Sort activities by",
+            choices = ["date", "distance", "duration", "pace", "none"],
+            default="none"
+        )
+        if sort_choice != "none":
+            order = Prompt.ask(
+                "Order",
+                choices = ["ascending", "descending"],
+                default = "ascending"
+            )
+            activities = self.activity_service.sort_activities(activities, sort_choice, is_descending = order == "descending",)
+
+        self.display_activities(activities)
         self.pause()
 
     def edit_activity(self) -> None:
@@ -668,7 +693,7 @@ class CLI:
             return None
 
         # self.show_activities()
-        self.display_activities()
+        self.display_activities(activities)
 
         while True:
             choice = self.prompt_for_int("Select activity number (0 to cancel)")

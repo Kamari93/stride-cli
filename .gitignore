@@ -21,3 +21,6 @@ stride.db
 # Coverage
 .Coverage
 htmlcov/
+
+# CSV exports
+*.csv
