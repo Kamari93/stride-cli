@@ -173,6 +173,111 @@ def test_sort_activities_doesnt_modify_original_list(service):
     assert activities == [activity_1, activity_2]
     assert result == [activity_2, activity_1]
 
+def test_filter_activities_by_type(service):
+    '''Filtering should return only activities of the requested type.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40)
+    activity_3 = Activity("run", 5, 45)
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.filter_activities(activities, activity_type="run")
+
+    assert len(result) == 2
+    assert all(activity.activity_type == "run" for activity in result)
+
+def test_filter_activities_by_type_no_match(service):
+    '''Filtering should return an empty list when nothing matches.'''
+    activites = [
+        Activity("walk", 2, 40),
+        Activity("walk", 3, 50),
+    ]
+
+    result = service.filter_activities(activites, activity_type="run")
+
+    assert result == []
+
+def test_filter_activities_by_min_distance(service):
+    '''Filtering should return activities at or above minimum distance.'''
+    activities = [
+        Activity("run", 2, 20),
+        Activity("run", 5, 45),
+        Activity("walk", 8, 100),
+    ]
+
+    result = service.filter_activities(activities, min_distance=5.0)
+
+    assert len(result) == 2
+    assert [activity.distance for activity in result] == [5, 8]
+    assert all(activity.distance >= 5 for activity in result)
+
+def test_filter_activities_by_max_distance(service):
+    '''Filtering should return activities at or below maximum distance.'''
+    activities = [
+        Activity("run", 2, 20),
+        Activity("run", 5, 45),
+        Activity("walk", 8, 100),
+    ]
+
+    result = service.filter_activities(activities, max_distance=5.0)
+
+    assert len(result) == 2
+    assert [activity.distance for activity in result] == [2, 5]
+    assert all(activity.distance <= 5 for activity in result)
+
+def test_filter_activities_by_date_range(service):
+    '''Filtering should return activities inside the date range.'''
+    older = Activity("run", 3, 30)
+    older.date = datetime(2026, 1, 1)
+    middle = Activity("walk", 2, 40)
+    middle.date = datetime(2026, 2, 1)
+    newer = Activity("run", 5, 45)
+    newer.date = datetime(2026, 3, 1)
+
+    activities = [older, middle, newer]
+    result = service.filter_activities(activities, start_date=datetime(2026, 1, 15), end_date=datetime(2026, 2, 28))
+
+    assert result == [middle]
+
+def test_filter_activities_with_multiple_filters(service):
+    '''Multiple filters should be applied together.'''
+    run_short = Activity("run", 2, 20)
+    run_short.date = datetime(2026, 2, 1)
+    run_mid = Activity("run", 4, 35)
+    run_mid.date = datetime(2026, 2, 16)
+    run_long = Activity("run", 5, 45)
+    # run_long.date = datetime(2026, 2, 10)
+    run_long_date = '02-10-2026'
+    run_long.date = datetime.strptime(run_long_date, "%m-%d-%Y")
+    walk_long = Activity("walk", 6, 70)
+    walk_long.date = datetime(2026, 2, 10)
+
+    activities = [run_short, run_mid, run_long, walk_long]
+
+    result = service.filter_activities(activities, activity_type="run", min_distance=4.0, end_date=datetime(2026, 2, 15))
+
+    assert result == [run_long]
+
+def test_filter_activities_with_no_filter(service):
+    '''No filters should return all activities.'''
+    activities = [Activity("run", 3, 30), Activity("walk", 2, 40)]
+
+    result = service.filter_activities(activities)
+
+    assert result == activities
+
+def test_filter_activities_does_not_modify_original_list(service):
+    '''Filtering should not modify the original list.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40)
+
+    activities = [activity_1, activity_2]
+
+    result = service.filter_activities(activities, activity_type="walk")
+
+    assert activities != result
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_2]
+
 if __name__ == "__main__":
     pytest.main([__file__])
     

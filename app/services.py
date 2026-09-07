@@ -89,6 +89,35 @@ class ActivityService:
             return sorted(activities, key=lambda activity: activity.calculate_pace(), reverse=is_descending)
         raise ValueError("Sort field must be 'date', 'distance', 'duration', or 'pace'.")
 
+    def filter_activities(
+            self,
+            activities: list[Activity],
+            activity_type: str | None = None,
+            start_date: datetime | None = None,
+            end_date: datetime | None = None,
+            min_distance: float | None = None,
+            max_distance: float | None = None,
+    ) -> list[Activity]:
+        '''Return activities matching the supplied filters.'''
+        # filtered references the original activities list & list comprehension conditionals create new lists 
+        filtered = activities 
+
+        if activity_type is not None:
+            filtered = [activity for activity in filtered if activity.activity_type == activity_type]
+
+        if start_date is not None:
+            filtered = [activity for activity in filtered if activity.date >= start_date]
+
+        if end_date is not None:
+            filtered = [activity for activity in filtered if activity.date.date() <= end_date.date()] # normalize to compare only pure dates in case time inerferes with filtering
+
+        if min_distance is not None:
+            filtered = [activity for activity in filtered if activity.distance >= min_distance]
+
+        if max_distance is not None:
+            filtered = [activity for activity in filtered if activity.distance <= max_distance]
+
+        return filtered
 
 class GoalService:
     '''Coordinates business logic for Goal objects.'''

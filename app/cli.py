@@ -6,6 +6,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from rich import box
+from datetime import datetime
 
 from app.models import Activity, Goal
 from app.services import ActivityService, GoalService
@@ -189,21 +190,28 @@ class CLI:
             self.pause()
             return
 
-        sort_choice = Prompt.ask(
-            "Sort activities by",
-            choices = ["date", "distance", "duration", "pace", "none"],
-            default="none"
-        )
-        if sort_choice != "none":
-            order = Prompt.ask(
-                "Order",
-                choices = ["ascending", "descending"],
-                default = "ascending"
-            )
-            activities = self.activity_service.sort_activities(activities, sort_choice, is_descending = order == "descending",)
+        activities = self.refine_activities(activities)
+
+        if not activities:
+            self.console.print("[yellow]No activities match your filters.[/yellow]")
+            self.pause()
+            return
 
         self.display_activities(activities)
         self.pause()
+        # sort_choice = Prompt.ask(
+        #     "Sort activities by",
+        #     choices = ["date", "distance", "duration", "pace", "none"],
+        #     default="none"
+        # )
+        # if sort_choice != "none":
+        #     order = Prompt.ask(
+        #         "Order",
+        #         choices = ["ascending", "descending"],
+        #         default = "ascending"
+        #     )
+        #     activities = self.activity_service.sort_activities(activities, sort_choice, is_descending = order == "descending",)
+
 
     def edit_activity(self) -> None:
         '''Edit an existing activity.'''
@@ -692,6 +700,7 @@ class CLI:
             self.show_error("No activities found.")
             return None
 
+        activities = self.refine_activities(activities)
         # self.show_activities()
         self.display_activities(activities)
 
@@ -713,3 +722,140 @@ class CLI:
         '''Exit the app.'''
         self.console.print("\nGoodbye!")
         self.running = False
+
+    def refine_activities(self, activities: list[Activity]) -> list[Activity]:
+        '''Helper function to sort, filter, search activities list'''
+        filter_choice = self.prompt_for_filter()
+
+        if filter_choice == "2":
+            activity_type = self.prompt_for_activity_type()
+            activities = self.activity_service.filter_activities(activities, activity_type=activity_type)
+
+        elif filter_choice == "3":
+            start_date, end_date = self.prompt_for_date_filter()
+            activities = self.activity_service.filter_activities(activities, start_date=start_date, end_date=end_date)
+
+        elif filter_choice == "4":
+            min_distance, max_distance = self.prompt_for_distance_filter()
+            activities = self.activity_service.filter_activities(activities, min_distance=min_distance, max_distance=max_distance)
+
+        if filter_choice == "5":
+            filters = self.prompt_for_multiple_filters()
+            activities = self.activity_service.filter_activities(activities, **filters) #dict unpacking lets python treat key-val pairs as kwargs
+
+        # sorting 
+        activities = self.prompt_for_sorting(activities)
+        # sort_choice = Prompt.ask(
+        #     "Sort activities by",
+        #     choices = ["date", "distance", "duration", "pace", "none"],
+        #     default="none"
+        # )
+        # if sort_choice != "none":
+        #     order = Prompt.ask(
+        #         "Order",
+        #         choices = ["ascending", "descending"],
+        #         default = "ascending"
+        #     )
+        #     activities = self.activity_service.sort_activities(activities, sort_choice, is_descending = order == "descending",)
+        return activities
+
+    def prompt_for_filter(self) -> str:
+        '''Prompt the user to choose how to filter activities.'''
+        self.console.print("\n[bold]Filter Activities[/bold]")
+        self.console.print("1. No filter")
+        self.console.print("2. Activity type")
+        self.console.print("3. Date range")
+        self.console.print("4. Distance range")
+        self.console.print("5. Multiple filters")
+
+        return Prompt.ask("\nChoose an option", choices=["1", "2", "3", "4", "5"])
+
+    def prompt_for_activity_type(self) -> str:
+        '''Prompt the user to select an activity type.'''
+        return Prompt.ask("Activity Type", choices=["walk", "run"])
+
+    def prompt_for_date_filter(self,) -> tuple[datetime | None, datetime, None]:
+        '''Prompt for optional start and end dates.'''
+        start_date = self.prompt_for_optional_date('Start Date (MM-DD-YYYY, optional)')
+        end_date = self.prompt_for_optional_date('End Date (MM-DD-YYYY, optional)')
+
+        return start_date, end_date
+
+    def prompt_for_optional_date(self, prompt: str) -> datetime | None:
+        '''Prompt for a date or return None if left blank.'''
+        while True:
+            value = Prompt.ask(prompt, default="").strip()
+
+            if value == "":
+                return None
+
+            try:
+                return datetime.strptime(value, "%m-%d-%Y")
+            except ValueError:
+                self.show_error("Please enter a date in MM-DD-YYYY format.")
+
+    def prompt_for_distance_filter(self) -> tuple[float | None, float | None]:
+        '''Prompt for optional minimum and maximum distance.'''
+        min_distance = self.prompt_for_optional_float("Minimum Distance (miles, optional)")
+        max_distance = self.prompt_for_optional_float("Maximum Distance (miles, optional)")
+
+        return min_distance, max_distance
+
+    def prompt_for_multiple_filters(self) -> dict:
+        '''Prompt the user for any combination of activity filters.'''
+        activity_type = None
+        start_date = None
+        end_date = None
+        min_distance = None
+        max_distance = None
+
+        apply_type = Prompt.ask("\nApply activity type filter?", choices=["y", "n"], default="n")
+        if apply_type == "y":
+            activity_type = self.prompt_for_activity_type()
+
+        apply_date = Prompt.ask("Apply date filter?", choices=["y", "n"], default="n")
+        if apply_date == "y":
+            start_date, end_date = self.prompt_for_date_filter()
+
+        apply_distance = Prompt.ask("Apply distance filter?", choices=["y", "n"], default="n")
+        if apply_distance == "y":
+            min_distance, max_distance = self.prompt_for_distance_filter()
+
+        return {
+            "activity_type": activity_type,
+            "start_date": start_date,
+            "end_date": end_date,
+            "min_distance": min_distance,
+            "max_distance": max_distance,
+        }
+
+    def prompt_for_sorting(self, activities: list[Activity]) -> list[Activity]:
+        '''Prompt the user for optional activity sorting.'''
+        self.console.print("\n[bold]Sort Activities[/bold]")
+        self.console.print("1. No sorting")
+        self.console.print("2. Date")
+        self.console.print("3. Distance")
+        self.console.print("4. Duration")
+        self.console.print("5. Pace")
+
+        sort_choice = Prompt.ask("\nChoose an option", choices=["1", "2", "3", "4", "5"], default="1")
+
+        if sort_choice == "1":
+            return activities
+
+        sort_options = {
+            "2": "date",
+            "3": "distance",
+            "4": "duration",
+            "5": "pace",
+        }
+
+        sort_by = sort_options[sort_choice]
+        order = Prompt.ask(
+            "Order",
+            choices = ["ascending", "descending"],
+            default = "ascending"
+        )
+
+        return self.activity_service.sort_activities(activities, sort_by, is_descending=order=="descending")
+
