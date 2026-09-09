@@ -206,6 +206,24 @@ def test_weekly_distance():
 
     assert result == 3.0
 
+def test_weekly_distance_uses_calendar_week():
+    '''The weekly_distance should sum up the activity distance for the current week'''
+    today = datetime(2026, 9, 9) # Wednesday
+
+    monday = Activity("run", 5.0, 50)
+    tuesday = Activity("walk", 3.0, 40)
+    wednesday = Activity("run", 4.0, 40)
+    sunday_before = Activity("walk", 10.0, 100)
+
+    activities = [monday, tuesday, wednesday, sunday_before]
+
+    activities[0].date = datetime(2026, 9, 7)
+    activities[1].date = datetime(2026, 9, 8)
+    activities[2].date = datetime(2026, 9, 9)
+    activities[3].date = datetime(2026, 9, 6)
+
+    assert weekly_distance(activities, today) == 12.0
+
 def test_weekly_distance_empty():
     '''The weekly_distance should return 0 if there were no activities recorded for the last 7 days'''
     most_recent = Activity(activity_type="run", distance=3.0, duration=30,)
@@ -231,6 +249,26 @@ def test_monthly_distance():
     result = monthly_distance([recent, older])
 
     assert result == 4.0
+
+def test_monthly_distance_uses_calendar_month():
+    '''The monthly_distance should sum up the activity distance for the current calendar month'''
+    today = datetime(2026, 9, 8)
+
+    activities = [
+        Activity("run", 5.0, 50, datetime(2026, 8, 31)),
+        Activity("walk", 3.0, 40, datetime(2026, 9, 1)),
+        Activity("run", 4.0, 40, datetime(2026, 9, 8)),
+        Activity("walk", 10.0, 100, datetime(2026, 10, 1)),
+    ]
+
+    # activities[0].date = datetime(2026, 8, 31)
+    # activities[1].date = datetime(2026, 9, 1)
+    # activities[2].date = datetime(2026, 9, 8)
+    # activities[3].date = datetime(2026, 10, 1)
+
+    result = monthly_distance(activities, today)
+
+    assert result == 7.0
 
 def test_monthly_distance_empty():
     '''The monthly_distance should return 0 if there were no activities recorded for the last 30 days'''

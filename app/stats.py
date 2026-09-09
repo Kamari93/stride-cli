@@ -94,27 +94,28 @@ def fastest_run_pace(activities: list[Activity],) -> Activity | None:
 
     return min(runs, key=lambda activity: activity.calculate_pace())
 
+
 def weekly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
-    '''Return distance logged during the current week.'''
+    '''Return distance logged during the current calendar week.'''
     if not activities:
         return 0.0
 
-    # date from one week ago
-    cutoff = datetime.now() - timedelta(days=7)
+    today = today or datetime.now()
+    week_start = today - timedelta(days=today.weekday())
 
-    # add up the distance for every activity that happened on or after cutoff date.
-    return sum(activity.distance for activity in activities if activity.date >= cutoff)
+    # add up the distance for every activity that happened during the week so far.
+    return sum(activity.distance for activity in activities if week_start.date() <= activity.date.date() <= today.date())
+
 
 def monthly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
-    '''Return distance logged during the current month.'''
+    '''Return distance logged during the current calendar month.'''
     if not activities:
         return 0.0
 
-    # date from one month ago
-    cutoff = datetime.now() - timedelta(days=30)
+    today = today or datetime.now()
     
-    # add up the distance for every activity that happened on or after cutoff date.
-    return sum(activity.distance for activity in activities if activity.date >= cutoff)
+    # add up the distance for every activity that happened during the current calendar month.
+    return sum(activity.distance for activity in activities if (activity.date.year == today.year and activity.date.month == today.month))
 
 def current_streak(activities: list[Activity], today: datetime | None = None,) -> int:
     '''Return the current activity streak in days.'''
@@ -160,3 +161,26 @@ def longest_streak(activities: list[Activity]) -> int:
             current = 1
 
     return longest
+
+
+# def weekly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
+#     '''Return distance logged during the current week (rolling window).'''
+#     if not activities:
+#         return 0.0
+
+#     # date from one week ago
+#     cutoff = datetime.now() - timedelta(days=7)
+
+#     # add up the distance for every activity that happened on or after cutoff date.
+#     return sum(activity.distance for activity in activities if activity.date >= cutoff)
+
+# def monthly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
+#     '''Return distance logged during the current month (rolling window).'''
+#     if not activities:
+#         return 0.0
+
+#     # date from one month ago
+#     cutoff = datetime.now() - timedelta(days=30)
+    
+#     # add up the distance for every activity that happened on or after cutoff date.
+#     return sum(activity.distance for activity in activities if activity.date >= cutoff)
