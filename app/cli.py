@@ -743,6 +743,13 @@ class CLI:
             filters = self.prompt_for_multiple_filters()
             activities = self.activity_service.filter_activities(activities, **filters) #dict unpacking lets python treat key-val pairs as kwargs
 
+        # searching
+        search_choice = self.prompt_for_search_choice()
+
+        if search_choice == "2":
+            search_term = self.prompt_for_search_term()
+            activities = self.activity_service.search_activities(activities, search_term)
+            
         # sorting 
         activities = self.prompt_for_sorting(activities)
         # sort_choice = Prompt.ask(
@@ -859,3 +866,22 @@ class CLI:
 
         return self.activity_service.sort_activities(activities, sort_by, is_descending=order=="descending")
 
+
+    def prompt_for_search_choice(self) -> str:
+        '''Prompt the user to optionally search activities.'''
+        self.console.print("\n[bold]Search Activities[/bold]")
+        self.console.print("1. No search")
+        self.console.print("2. Search notes and route")
+
+        return Prompt.ask("\nChoose an option", choices=["1", "2"], default="1")
+
+    def prompt_for_search_term(self) -> str:
+        '''Prompt the user for a non-empty search term.'''
+        search_term = Prompt.ask("Search term").strip()
+        while True:
+            if search_term:
+                return search_term
+
+            self.show_error("Search term cannot be empty.")
+
+        

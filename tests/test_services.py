@@ -278,6 +278,79 @@ def test_filter_activities_does_not_modify_original_list(service):
     assert activities == [activity_1, activity_2]
     assert result == [activity_2]
 
+def test_search_activities_by_notes(service):
+    '''Search should return activities whose notes contain the search term.'''
+    activity_1 = Activity("run", 3, 30, notes="Morning trail run")
+    activity_2 = Activity("walk", 2, 40, notes="Easy neighborhood walk")
+    activity_3 = Activity("run", 5, 45, notes="Evening track workout")
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.search_activities(activities, "trail")
+
+    assert result == [activity_1]
+
+def test_search_activities_by_route(service):
+    '''Search should return activities whose route contains the search term.'''
+    activity_1 = Activity("run", 3, 30, route="Memorial Park")
+    activity_2 = Activity("walk", 2, 40, route="Neighborhood")
+    activity_3 = Activity("run", 5, 45, route="Downtown")
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.search_activities(activities, "park")
+
+    assert result == [activity_1]
+
+def test_search_activities_is_case_insensitive(service):
+    '''Search should be case-insensitive.'''
+    activity = Activity("run", 3, 30, notes="Morning Trail Run")
+    activities = [activity]
+
+    result = service.search_activities(activities, "trail")
+
+    assert result == [activity]
+
+def test_search_activities_searches_notes_and_route(service):
+    '''Search should match either notes or route.'''
+    notes_activity = Activity("run", 3, 30, notes="Ran around the lake")
+    route_activity = Activity("walk", 2, 40, route="Lake Trail")
+    unrelated_activity = Activity("run", 5, 45, notes="Track workout")
+
+    activities = [notes_activity, route_activity, unrelated_activity]
+
+    result = service.search_activities(activities, "lake")
+
+    assert result == [notes_activity, route_activity]
+
+def test_search_activities_no_match(service):
+    '''Search should return an empty list when nothing matches.'''
+    activities = [Activity("run", 3, 30, notes="Morning run"), Activity("walk", 2, 40, route="Neighborhood")]
+    result = service.search_activities(activities, "beach")
+
+    assert result == []
+
+def test_search_activities_handles_none_fields(service):
+    '''Search should safely handle activities with no notes or route.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40, notes="Morning walk")
+
+    activities = [activity_1, activity_2]
+    result = service.search_activities(activities, "morning")
+
+    assert result == [activity_2]
+
+def test_search_activities_does_not_modify_original_list(service):
+    '''Search should not modify the original list.'''
+    activity_1 = Activity("run", 3, 30, notes="Trail run")
+    activity_2 = Activity("walk", 2, 40, notes="Neighborhood walk")
+
+    activities = [activity_1, activity_2]
+
+    result = service.search_activities(activities, "trail")
+
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_1]
+    assert result != activities
+
 if __name__ == "__main__":
     pytest.main([__file__])
     

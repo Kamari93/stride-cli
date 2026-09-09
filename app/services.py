@@ -119,6 +119,16 @@ class ActivityService:
 
         return filtered
 
+    def search_activities(self, activities: list[Activity], search_term: str) -> list[Activity]:
+        '''Return activities whose notes or route contain the search term.'''
+        search_term = search_term.lower()
+
+        return [activity for activity in activities if 
+                (activity.notes is not None and search_term in activity.notes.lower())
+                or 
+                (activity.route is not None and search_term in activity.route.lower())
+            ]
+
 class GoalService:
     '''Coordinates business logic for Goal objects.'''
     def __init__(self, repository: ActivityRepository) -> None:
