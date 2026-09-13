@@ -162,6 +162,56 @@ def longest_streak(activities: list[Activity]) -> int:
 
     return longest
 
+def weekly_distance_history(activities: list[Activity], weeks: int = 4, today: datetime | None = None) -> list[tuple[str, float]]:
+    '''Return weekly distance totals for the requested number of weeks.'''
+    today = today or datetime.now()
+    results = []
+
+    for i in range(weeks - 1, -1, -1):
+        week_date = today - timedelta(weeks=i)
+        week_start = week_date - timedelta(days=week_date.weekday())
+        week_end = week_start + timedelta(days=6)
+
+        distance = sum(
+            activity.distance for activity in activities if 
+            week_start.date() <= activity.date.date() <= week_end.date()
+        )
+
+        label = week_start.strftime("%b %d")
+        results.append((label, distance))
+
+    return results
+
+def monthly_distance_history(activities: list[Activity], months: int = 6, today: datetime | None = None) -> list[tuple[str, float]]:
+    '''Return monthly distance totals for the requested number of months.'''
+    today = today or datetime.now()
+    results = []
+
+    month = today.month
+    year = today.year
+
+    for i in range(months - 1, -1, -1):
+        total_months = year * 12 + (month - 1) - i
+        target_year = total_months // 12
+        target_month = total_months % 12 + 1
+
+        distance = sum(
+            activity.distance for activity in activities if 
+            (activity.date.year == target_year and activity.date.month == target_month)
+        )
+
+        label = datetime(target_year, target_month, 1).strftime("%b %Y")
+        results.append((label, distance))
+
+    return results
+
+def activity_distance_history(activities: list[Activity]) -> list[tuple[str, float]]:
+    '''Return activity dates and distances in chronological order.'''
+    sorted_activities = sorted(activities, key=lambda activity: activity.date)
+
+    return [
+        (activity.date.strftime("%b %d"), activity.distance) for activity in sorted_activities
+    ]
 
 # def weekly_distance(activities: list[Activity], today: datetime | None = None,) -> float:
 #     '''Return distance logged during the current week (rolling window).'''

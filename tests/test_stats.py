@@ -18,7 +18,10 @@ from app.stats import (
     average_walk_pace,
     average_run_pace,
     fastest_walk_pace,
-    fastest_run_pace
+    fastest_run_pace,
+    weekly_distance_history,
+    monthly_distance_history,
+    activity_distance_history,
 )
 
 def test_total_activities():
@@ -369,6 +372,58 @@ def test_longest_streak():
 def test_longest_streak_empty():
     '''longest_streak should return 0 if activities list is empty'''
     assert longest_streak([]) == 0
+
+def test_weekly_distance_history():
+    '''weekly_distance_history should return list of tuples for total distance for each week based on weeks param'''
+    today = datetime(2026, 9, 9)
+
+    activities = [
+        Activity("run", 5.0, 50, datetime(2026, 8, 24)), 
+        Activity("walk", 3.0, 40, datetime(2026, 9, 1)), 
+        Activity("run", 4.0, 40, datetime(2026, 9, 8))
+        ]
+    result = weekly_distance_history(activities, weeks=3, today=today)
+
+    assert result == [
+        ("Aug 24", 5.0),
+        ("Aug 31", 3.0),
+        ("Sep 07", 4.0),
+    ]
+
+def test_monthly_distance_history():
+    '''monthly_distance_history should return list of tuples for total distance for each month based on weeks param'''
+    today = datetime(2026, 9, 9)
+
+    activities = [
+        Activity("run", 5.0, 50, datetime(2026, 7, 15)),
+        Activity("walk", 3.0, 40, datetime(2026, 8, 10)),
+        Activity("run", 4.0, 40, datetime(2026, 9, 8)),
+    ]
+
+    result = monthly_distance_history(activities, months=3, today=today)
+
+    assert result == [
+        ("Jul 2026", 5.0),
+        ("Aug 2026", 3.0),
+        ("Sep 2026", 4.0),
+    ]
+
+def test_activity_distance_history():
+    '''test_activity_distance_history should return activity dates and distances in chronological order'''
+    activities = [
+        Activity("run", 4.0, 40, datetime(2026, 9, 5)),
+        Activity("walk", 2.5, 30, datetime(2026, 9, 1)),
+        Activity("run", 3.2, 35, datetime(2026, 9, 3))
+    ]
+
+    result = activity_distance_history(activities)
+
+    assert result == [
+        ("Sep 01", 2.5),
+        ("Sep 03", 3.2),
+        ("Sep 05", 4.0),
+    ]
+
 
 if __name__ == "main":
     pytest.main([__file__])

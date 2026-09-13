@@ -7,6 +7,7 @@ from rich.prompt import Prompt
 from rich.table import Table
 from rich import box
 from datetime import datetime
+import plotext as plt
 
 from app.models import Activity, Goal
 from app.services import ActivityService, GoalService
@@ -28,6 +29,9 @@ from app.stats import (
     average_run_pace,
     fastest_walk_pace,
     fastest_run_pace,
+    weekly_distance_history,
+    monthly_distance_history,
+    activity_distance_history,
 )
 
 class CLI:
@@ -65,14 +69,15 @@ class CLI:
         self.console.print("4. Delete Activity")
         self.console.print("5. Statistics")
         self.console.print("6. Goals")
-        self.console.print("7. Export Activities")
-        self.console.print("8. Exit")
+        self.console.print("7. Charts")
+        self.console.print("8. Export Activities")
+        self.console.print("9. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3", "4", "5", "6", "7", "8"],
+            choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
@@ -96,9 +101,12 @@ class CLI:
             self.show_goals_menu()
 
         elif choice == "7":
-            self.export_activities()
+            self.show_charts()
 
         elif choice == "8":
+            self.export_activities()
+
+        elif choice == "9":
             self.exit()
 
     
@@ -360,6 +368,12 @@ class CLI:
         self.console.print(Panel.fit("Activity Summary", title="Statistics", border_style="cyan",))
         self.console.print(table)
 
+        # self.console.print()
+        # self.show_weekly_distance_chart(activities)
+        # self.console.print()
+        # self.show_monthly_distance_chart(activities)
+        # self.console.print()
+        # self.show_activity_trend_chart(activities)
         self.pause()
 
     def show_goals_menu(self) -> None:
@@ -749,7 +763,7 @@ class CLI:
         if search_choice == "2":
             search_term = self.prompt_for_search_term()
             activities = self.activity_service.search_activities(activities, search_term)
-            
+
         # sorting 
         activities = self.prompt_for_sorting(activities)
         # sort_choice = Prompt.ask(
@@ -884,4 +898,117 @@ class CLI:
 
             self.show_error("Search term cannot be empty.")
 
-        
+    def show_weekly_distance_chart(self, activities: list[Activity]) -> None:
+        '''Display weekly distance totals as a bar chart.'''
+        weekly_data = weekly_distance_history(activities, weeks=4)
+
+        labels = [label for label, _ in weekly_data]
+        distances = [distance for _, distance in weekly_data]
+
+        fig = plt.figure
+        fig.clear()
+        # color = plt.marker("brick", pixel = 130)
+        # colors  = [plt.marker("brick", pixel = color) for color in (130, 29, 130, 29)]
+        colors  = [plt.marker("brick", pixel = color) for color in (130, 29)]
+
+        signal = fig.bar(labels, distances, marker = colors)
+        fig.plot_size(100, 25) 
+        fig.theme("colorless")
+        fig.draw(signal)
+
+        fig.title("Weekly Distance")
+        fig.label("Week", axis = "x")
+        fig.label("Miles", axis = "y")
+        fig.show()
+
+    def show_monthly_distance_chart(self, activities: list[Activity]) -> None:
+        '''Display weekly distance totals as a bar chart.'''
+        monthly_data = monthly_distance_history(activities, months=6)
+
+        labels = [label for label, _ in monthly_data]
+        distances = [distance for _, distance in monthly_data]
+
+        fig = plt.figure
+        fig.clear()
+        # color = plt.marker("brick", pixel = 130)
+        # colors  = [plt.marker("brick", pixel = color) for color in (130, 29, 130, 29)]
+        colors  = [plt.marker("brick", pixel = color) for color in (29, 130)]
+
+        signal = fig.bar(labels, distances, marker = colors)
+        fig.plot_size(100, 25) 
+        fig.theme("colorless")
+        fig.draw(signal)
+
+        fig.title("Monthly Distance")
+        fig.label("Month", axis = "x")
+        fig.label("Miles", axis = "y")
+        fig.show()
+
+    def show_activity_trend_chart(self, activities: list[Activity]) -> None:
+        '''Display activity distance over time as a line chart.'''
+        trend_data = activity_distance_history(activities)
+
+        labels = [label for label, _ in trend_data]
+        distances = [distance for _, distance in trend_data]
+
+        fig = plt.figure
+        fig.clear()
+
+        fig.date('x').activate(form="%b %d")
+
+        # color = plt.marker("circle", pixel = 89)
+        color = [plt.marker("circle", pixel = color) for color in (130, 29)]
+        signal = fig.signal(labels, distances, marker=color)
+        fig.plot_size(100, 25)
+        fig.theme("colorless")
+        fig.draw(signal)
+
+        fig.title("Activity Distance Trend")
+        fig.label("Date", axis = "x")
+        fig.label("Miles", axis = "y")
+        fig.show()
+
+    def show_charts(self) -> None:
+        '''Display the charts menu.'''
+        activities = self.activity_service.get_all_activities()
+
+        if not activities:
+            self.show_error("No activities found.")
+            self.pause()
+            return
+
+        while True:
+            self.console.print("\n[bold]Charts[/bold]")
+            self.console.print("1. Weekly Distance")
+            self.console.print("2. Monthly Distance")
+            self.console.print("3. Activity Distance Trends")
+            self.console.print("4. Show All Charts")
+            self.console.print("5. Back To Main Menu")
+
+            choice = Prompt.ask(
+                "\nChoose an option",
+                choices=["1", "2", "3", "4", "5"]
+            )
+
+            if choice == "1":
+                self.console.print("\n")
+                self.show_weekly_distance_chart(activities)
+                self.pause()
+            elif choice == "2":
+                self.console.print("\n")
+                self.show_monthly_distance_chart(activities)
+                self.pause()
+            elif choice == "3":
+                self.console.print("\n")
+                self.show_activity_trend_chart(activities)
+                self.pause()
+            elif choice == "4":
+                self.console.print("\n")
+                self.show_weekly_distance_chart(activities)
+                self.console.print("\n")
+                self.show_monthly_distance_chart(activities)
+                self.console.print("\n")
+                self.show_activity_trend_chart(activities)
+                self.pause()
+            elif choice == "5":
+                return
