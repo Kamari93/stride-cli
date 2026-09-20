@@ -180,7 +180,7 @@ class CLI:
                 # str(activity.date),
                 activity.formatted_date(),
             )
-        self.console.print("\n")
+        # self.console.print("\n")
         self.console.print(table)
 
     # def show_activities(self) -> None:
@@ -205,6 +205,8 @@ class CLI:
             self.pause()
             return
 
+        self.console.print()
+        self.console.print(Panel.fit("View the details of your saved walks and runs.", title="Activities", border_style="cyan",))
         self.display_activities(activities)
         self.pause()
         # sort_choice = Prompt.ask(
@@ -431,11 +433,11 @@ class CLI:
 
             goal_name = goal.goal_type.replace("_", " ").title()
 
-            if goal.goal_type in ("weekly_distance", "monthly_distance"):
+            if goal_name in ("Weekly Distance", "Monthly Distance"):
                 target_text = f"{goal.target:.1f} mi"
                 progress_text = f"{progress:.1f} mi"
 
-            if goal.goal_type in ("current_streak", "longest_streak"):
+            elif goal_name in ("Current Streak", "Longest Streak"):
                 target_text = f"{goal.target:.0f} days"
                 progress_text = f"{progress:.0f} days"
 
