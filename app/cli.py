@@ -11,6 +11,7 @@ import plotext as plt
 
 from app.models import Activity, Goal
 from app.services import ActivityService, GoalService
+from app.weather import Weather_Service
 from app.stats import (
     total_activities,
     total_distance,
@@ -36,10 +37,11 @@ from app.stats import (
 
 class CLI:
     '''Handles all user interactions.'''
-    def __init__(self, activity_service: ActivityService, goal_service: GoalService) -> None:
+    def __init__(self, activity_service: ActivityService, goal_service: GoalService, weather_service: Weather_Service) -> None:
         self.console = Console()
         self.activity_service = activity_service
         self.goal_service = goal_service
+        self.weather_service = weather_service
         self.running = True
     
     def run(self) -> None:
@@ -63,53 +65,84 @@ class CLI:
     def show_main_menu(self) -> None:
         '''Display the main menu.'''
         self.console.print("\n[bold]Main Menu[/bold]")
-        self.console.print("1. Log Activity")
-        self.console.print("2. View Activities")
-        self.console.print("3. Edit Activity")
-        self.console.print("4. Delete Activity")
-        self.console.print("5. Statistics")
-        self.console.print("6. Goals")
-        self.console.print("7. Charts")
-        self.console.print("8. Export Activities")
-        self.console.print("9. Exit")
+        self.console.print("1.  Check Weather")
+        self.console.print("2.  Log Activity")
+        self.console.print("3.  View Activities")
+        self.console.print("4.  Edit Activity")
+        self.console.print("5.  Delete Activity")
+        self.console.print("6.  Statistics")
+        self.console.print("7.  Goals")
+        self.console.print("8.  Charts")
+        self.console.print("9.  Export Activities")
+        self.console.print("10. Exit")
 
     def get_menu_choice(self) -> str:
         '''Prompt the user for a menu selection.'''
         return Prompt.ask(
             "Choose an option",
-            choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+            choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
         )
 
     def handle_menu_choice(self, choice: str) -> None:
         '''Route the user's choice to the appropriate feature.'''
         if choice == "1":
+            self.show_weather()
+
+        elif choice == "2":
             self.log_activity()
         
-        elif choice == "2":
+        elif choice == "3":
             self.show_activities()
 
-        elif choice == "3":
+        elif choice == "4":
             self.edit_activity()
         
-        elif choice == "4":
+        elif choice == "5":
             self.delete_activity()
 
-        elif choice == "5":
+        elif choice == "6":
             self.show_statistics()
 
-        elif choice == "6":
+        elif choice == "7":
             self.show_goals_menu()
 
-        elif choice == "7":
+        elif choice == "8":
             self.show_charts()
 
-        elif choice == "8":
+        elif choice == "9":
             self.export_activities()
 
-        elif choice == "9":
+        elif choice == "10":
             self.exit()
 
-    
+
+    def show_weather(self) -> None:
+        '''Display current weather for a selected city.'''
+        city = Prompt.ask("\nEnter a city")
+        self.console.print()
+
+        try:
+            weather = self.weather_service.get_weather(city)
+            
+            self.console.print(
+                Panel(
+                    f"[bold]Temperature:[/bold] {weather.temperature:.1f}°F\n"
+                    f"[bold]Feels Like:[/bold] {weather.feels_like:.1f}°F\n"
+                    f"[bold]Conditions:[/bold] {weather.conditions}\n"
+                    f"[bold]Wind:[/bold] {weather.wind_speed:.1f} mph\n"
+                    f"[bold]Rain Chance:[/bold] "
+                    f"{weather.precipitation_probability}%",
+                    title=f"Weather — {weather.city}, {weather.country}",
+                )
+            )
+        except ValueError as exc:
+            self.console.print(f"[red]{exc}[/red]")
+
+        except ConnectionError as exc:
+            self.console.print(f"[red]Weather Unavailable:[/red] {exc}")
+
+        self.pause()
+
     def log_activity(self) -> None:
         '''Display the Log Activity screen.'''
         self.console.print("\n[bold]Log Activity[/bold]")

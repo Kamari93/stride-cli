@@ -102,3 +102,15 @@ class Goal:
             "goal_type": self.goal_type,
             "target": self.target,
         }
+
+@dataclass
+class Weather:
+    '''This represents weather data in Stride's own domain language.'''
+    city: str
+    country: str
+    temperature: float
+    feels_like: float
+    conditions: str
+    wind_speed: float
+    precipitation_probability: float
+
