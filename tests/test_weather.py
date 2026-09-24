@@ -174,6 +174,16 @@ def test_open_meteo_provider_handles_malformed_geocoding_response(mock_get):
     with pytest.raises(ConnectionError, match="Invalid location data received."):
         provider.get_weather("Austin")
 
+@patch("app.weather.requests.get") # my_module.external_api_call
+def test_open_meteo_provider_handles_timeout(mock_get):
+    '''Test and verify that a network timeout gets converted into a ConnectionError'''
+    mock_get.side_effect = requests.Timeout()
+
+    provider = OpenMeteoProvider()
+    
+    with pytest.raises(ConnectionError, match="Unable to connect to the weather service."):
+        provider.get_weather("Austin")
+
 def test_weather_code_to_description():
     provider = OpenMeteoProvider()
 
