@@ -109,7 +109,21 @@ class OpenMeteoProvider(WeatherProvider):
         if not data.get("results"):
             raise ValueError(f"City not found: {city}")
 
-        return data["results"][0]
+        # return data["results"][0]
+        '''validate geocoding return data'''
+        try:
+            result =  data["results"][0]
+
+            if not all(key in result for key in ("name", "latitude", "longitude", "country")):
+                raise KeyError
+
+            return result
+        
+        except (KeyError, TypeError, IndexError) as exc:
+            raise ConnectionError(
+                "Invalid location data received."
+                ) from exc
+
 
     def _weather_code_to_description(self, code: int) -> str:
         '''Convert an Open-Meteo weather code into a readable description.'''

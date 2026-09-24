@@ -156,7 +156,23 @@ def test_open_meteo_provider_handles_malformed_response(mock_get):
         provider.get_weather("Austin")
     
 
+@patch("app.weather.requests.get") # my_module.external_api_call
+def test_open_meteo_provider_handles_malformed_geocoding_response(mock_get):
+    '''Test malformed API responses for incomplete geocoding response for city look-up'''
+    geocoding_reponse = Mock()
+    geocoding_reponse.json.return_value = {
+        "results": [
+            {
+                "name": "Austin",
+                #Latitude and Longitude missing
+            }
+        ]
+    }
 
+    provider = OpenMeteoProvider()
+
+    with pytest.raises(ConnectionError, match="Invalid location data received."):
+        provider.get_weather("Austin")
 
 def test_weather_code_to_description():
     provider = OpenMeteoProvider()
