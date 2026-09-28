@@ -25,9 +25,16 @@ git clone <repository-url>
 cd stride-cli
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
 Install Stride:
+
+```bash
 pip install .
+```
 
 Run the application:
+
+```bash
 stride
+```
