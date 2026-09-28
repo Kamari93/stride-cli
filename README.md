@@ -1,32 +1,33 @@
-# stride-cli
-A Python CLI application for tracking walking and running progress with goals, statistics, and data visualization.
+# Stride CLI
 
-## Description
-The basic idea is a CLI application where users log walks and runs, then view statistics about their progress over time.
+A command-line application for tracking walks and runs.
 
-## Current Features
+## Features
 
-- Log activities
-- View activity history
-- View statistics
-- Set goals
+- Log walking and running activities
+- Store activities with SQLite
+- Update and delete activities
+- Track distance, duration, pace, and notes
+- View activity statistics
+- Track fitness goals
+- Search, filter, and sort activities
+- Export activities to CSV
+- View distance history and charts
+- Check current weather by city
+- Rich terminal interface
 
-## Planned Features
+## Installation
 
-- Weekly summaries
-- Personal records
-- Achievements
-- Export to CSV
-- Weather integration
+Clone the repository and create a virtual environment:
 
-## Technologies
-1. rich - CLI, tables, colors, panels.
-2. InquirePy - Interactive menus.
-3. Pydantic - Data validation and json models.
-4. plotext - Terminal charts to track progress.
-5. pytest - Automated testing.
-6. sqlite - DB to make filtering, searching, and statistics simpler.
+```bash
+git clone <repository-url>
+cd stride-cli
+python3 -m venv .venv
+source .venv/bin/activate
 
-## Project Status
+Install Stride:
+pip install .
 
-## Roadmap
+Run the application:
+stride
