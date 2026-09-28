@@ -1,0 +1,455 @@
+"""Tests for the ActivityService."""
+import pytest
+from uuid import uuid4
+from app.models import Activity
+from app.services import ActivityService
+from app.database import ActivityRepository
+from datetime import datetime
+
+@pytest.fixture
+def service():
+    repo = ActivityRepository(":memory:") # SQLite creates a temporary in-memory database that disappears after the test.
+    service = ActivityService(repo)
+    yield service # pause the fixture to run the test
+    repo.close()
+
+def test_create_activity(service):
+    '''A created activity should be stored.'''
+    activity = Activity( activity_type="run", distance=3, duration=25,)
+    created = service.create_activity(activity)
+
+    assert created == activity
+
+def test_get_all_activities(service):
+    '''Service should return every stored activity.'''
+    activity1 = Activity( activity_type="run", distance=3, duration=25,)
+    activity2 = Activity( activity_type="walk", distance=2, duration=40,)
+
+    service.create_activity(activity1)
+    service.create_activity(activity2)
+    activities = service.get_all_activities()
+
+    assert len(activities) == 2
+
+def test_get_activity_by_id(service):
+    '''Service should return activity by id.'''
+    activity = Activity(activity_type="run", distance=4, duration=32)
+    service.repository.create_activity(activity)
+
+    found = service.get_activity_by_id(activity.id)
+
+    assert found is not None
+    assert found.id == activity.id
+
+def test_update_activity(service):
+    '''Service should update an existing activity'''
+    activity = Activity(activity_type="run", distance=3, duration=30, notes="Original",)
+    service.create_activity(activity)
+
+    updated_activity = Activity(activity_type="run", distance=5, duration=45, notes="Updated",)
+    result = service.update_activity(activity.id, updated_activity)
+
+    assert result is not None
+    assert result.id == activity.id
+    assert result.distance == 5
+    assert result.duration == 45
+    assert result.notes == "Updated"
+
+    loaded = service.get_activity_by_id(activity.id)
+
+    assert loaded is not None
+    assert loaded.distance == 5
+    assert loaded.duration == 45
+    assert loaded.notes == "Updated"
+
+def test_update_activity_not_found(service):
+    '''Service should return None if id is not found.'''
+    activity = Activity(activity_type="run", distance=5, duration=40,)
+
+    result = service.update_activity(uuid4(), activity)
+
+    assert result is None
+
+def test_delete_activity(service):
+    '''Service should delete an existing activity.'''
+    activity = Activity(activity_type="run", distance=3.0, duration=30.0,)
+    service.repository.create_activity(activity)
+
+    deleted = service.delete_activity(activity.id)
+
+    assert deleted is True
+    assert service.get_activity_by_id(activity.id) is None
+    assert service.repository.get_activity_by_id(activity.id) is None
+
+def test_delete_activity_not_found(service):
+    '''Service should return False when the activity does not exist.'''
+    deleted = service.delete_activity(uuid4())
+
+    assert deleted is False
+
+def test_export_activities(service, tmp_path):
+    '''Service should export stored activities to CSV.'''
+    activity = Activity(activity_type="run", distance=3.0, duration=30.0,)
+
+    service.create_activity(activity)
+
+    filepath = tmp_path/"activities.csv"
+    service.export_activities(filepath)
+
+    assert filepath.exists()
+
+    content = filepath.read_text(encoding="utf-8")
+
+    assert "activity_type" in content
+    assert "run" in content
+    assert "3.0" in content
+    assert "30.0" in content
+
+def test_sort_activities_by_distance(service):
+    '''Activities should be sorted by distance.'''
+    activites = [Activity("run", 5, 50), Activity("walk", 2, 40), Activity("run", 8, 80)]
+    result = service.sort_activities(activites, "distance")
+
+    assert [activity.distance for activity in result] == [2, 5, 8]
+
+def test_sort_activities_by_distance_descending(service):
+    '''Activities should be sorted by distance descending.'''
+    activites = [Activity("run", 5, 50), Activity("walk", 2, 40), Activity("run", 8, 80)]
+    result = service.sort_activities(activites, "distance", True)
+
+    assert [activity.distance for activity in result] == [8, 5, 2]
+
+def test_sort_activities_by_duration(service):
+    '''Activities should be sorted by duration.'''
+    activities = [Activity("run", 30, 60), Activity("walk", 2, 20), Activity("run", 5, 45)]
+    result = service.sort_activities(activities, "duration")
+
+    assert [activity.duration for activity in result] == [20, 45, 60]
+
+def test_sort_activities_by_pace(service):
+    '''Activities should be sorted by pace.'''
+    activities = [
+        Activity("run", 3, 30), # pace is 10 min/mi
+        Activity("walk", 4, 32), # pace is 8 min/mi
+        Activity("run", 2, 40),  # pace is 20 min/mi
+        ]
+    result = service.sort_activities(activities, "pace")
+
+    assert [activity.calculate_pace() for activity in result] == [8, 10, 20]
+
+def test_sort_activities_by_date(service):
+    '''Activities should be sorted by date.'''
+    older = Activity("run", 3, 30)
+    middle = Activity("run", 4, 40)
+    newer = Activity("walk", 2, 30)
+
+    # today = datetime.now()
+    older.date = datetime(2026, 1, 1)
+    middle.date = datetime(2026, 2, 1)
+    newer.date = datetime(2026, 3, 1)
+
+    activities = [older, middle, newer]
+
+    result = service.sort_activities(activities, "date")
+
+    assert result == [older, middle, newer]
+
+def test_sort_activities_invalid_field(service):
+    '''Invalid sort fields should raise ValueError.'''
+    activities = [Activity("run", 3, 30)]
+
+    with pytest.raises(ValueError):
+        service.sort_activities(activities, "invalid")
+
+def test_sort_activities_doesnt_modify_original_list(service):
+    '''Sorting should return a new list without changing the original.'''
+    activity_1 = Activity("run", 5, 50)
+    activity_2 = Activity("walk", 2, 40)
+
+    activities = [activity_1, activity_2]
+
+    result = service.sort_activities(activities, "distance")
+
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_2, activity_1]
+
+def test_filter_activities_by_type(service):
+    '''Filtering should return only activities of the requested type.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40)
+    activity_3 = Activity("run", 5, 45)
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.filter_activities(activities, activity_type="run")
+
+    assert len(result) == 2
+    assert all(activity.activity_type == "run" for activity in result)
+
+def test_filter_activities_by_type_no_match(service):
+    '''Filtering should return an empty list when nothing matches.'''
+    activites = [
+        Activity("walk", 2, 40),
+        Activity("walk", 3, 50),
+    ]
+
+    result = service.filter_activities(activites, activity_type="run")
+
+    assert result == []
+
+def test_filter_activities_by_min_distance(service):
+    '''Filtering should return activities at or above minimum distance.'''
+    activities = [
+        Activity("run", 2, 20),
+        Activity("run", 5, 45),
+        Activity("walk", 8, 100),
+    ]
+
+    result = service.filter_activities(activities, min_distance=5.0)
+
+    assert len(result) == 2
+    assert [activity.distance for activity in result] == [5, 8]
+    assert all(activity.distance >= 5 for activity in result)
+
+def test_filter_activities_by_max_distance(service):
+    '''Filtering should return activities at or below maximum distance.'''
+    activities = [
+        Activity("run", 2, 20),
+        Activity("run", 5, 45),
+        Activity("walk", 8, 100),
+    ]
+
+    result = service.filter_activities(activities, max_distance=5.0)
+
+    assert len(result) == 2
+    assert [activity.distance for activity in result] == [2, 5]
+    assert all(activity.distance <= 5 for activity in result)
+
+def test_filter_activities_by_date_range(service):
+    '''Filtering should return activities inside the date range.'''
+    older = Activity("run", 3, 30)
+    older.date = datetime(2026, 1, 1)
+    middle = Activity("walk", 2, 40)
+    middle.date = datetime(2026, 2, 1)
+    newer = Activity("run", 5, 45)
+    newer.date = datetime(2026, 3, 1)
+
+    activities = [older, middle, newer]
+    result = service.filter_activities(activities, start_date=datetime(2026, 1, 15), end_date=datetime(2026, 2, 28))
+
+    assert result == [middle]
+
+def test_filter_activities_with_multiple_filters(service):
+    '''Multiple filters should be applied together.'''
+    run_short = Activity("run", 2, 20)
+    run_short.date = datetime(2026, 2, 1)
+    run_mid = Activity("run", 4, 35)
+    run_mid.date = datetime(2026, 2, 16)
+    run_long = Activity("run", 5, 45)
+    # run_long.date = datetime(2026, 2, 10)
+    run_long_date = '02-10-2026'
+    run_long.date = datetime.strptime(run_long_date, "%m-%d-%Y")
+    walk_long = Activity("walk", 6, 70)
+    walk_long.date = datetime(2026, 2, 10)
+
+    activities = [run_short, run_mid, run_long, walk_long]
+
+    result = service.filter_activities(activities, activity_type="run", min_distance=4.0, end_date=datetime(2026, 2, 15))
+
+    assert result == [run_long]
+
+def test_filter_activities_with_no_filter(service):
+    '''No filters should return all activities.'''
+    activities = [Activity("run", 3, 30), Activity("walk", 2, 40)]
+
+    result = service.filter_activities(activities)
+
+    assert result == activities
+
+def test_filter_activities_does_not_modify_original_list(service):
+    '''Filtering should not modify the original list.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40)
+
+    activities = [activity_1, activity_2]
+
+    result = service.filter_activities(activities, activity_type="walk")
+
+    assert activities != result
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_2]
+
+def test_search_activities_by_notes(service):
+    '''Search should return activities whose notes contain the search term.'''
+    activity_1 = Activity("run", 3, 30, notes="Morning trail run")
+    activity_2 = Activity("walk", 2, 40, notes="Easy neighborhood walk")
+    activity_3 = Activity("run", 5, 45, notes="Evening track workout")
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.search_activities(activities, "trail")
+
+    assert result == [activity_1]
+
+def test_search_activities_by_route(service):
+    '''Search should return activities whose route contains the search term.'''
+    activity_1 = Activity("run", 3, 30, route="Memorial Park")
+    activity_2 = Activity("walk", 2, 40, route="Neighborhood")
+    activity_3 = Activity("run", 5, 45, route="Downtown")
+
+    activities = [activity_1, activity_2, activity_3]
+    result = service.search_activities(activities, "park")
+
+    assert result == [activity_1]
+
+def test_search_activities_is_case_insensitive(service):
+    '''Search should be case-insensitive.'''
+    activity = Activity("run", 3, 30, notes="Morning Trail Run")
+    activities = [activity]
+
+    result = service.search_activities(activities, "trail")
+
+    assert result == [activity]
+
+def test_search_activities_searches_notes_and_route(service):
+    '''Search should match either notes or route.'''
+    notes_activity = Activity("run", 3, 30, notes="Ran around the lake")
+    route_activity = Activity("walk", 2, 40, route="Lake Trail")
+    unrelated_activity = Activity("run", 5, 45, notes="Track workout")
+
+    activities = [notes_activity, route_activity, unrelated_activity]
+
+    result = service.search_activities(activities, "lake")
+
+    assert result == [notes_activity, route_activity]
+
+def test_search_activities_no_match(service):
+    '''Search should return an empty list when nothing matches.'''
+    activities = [Activity("run", 3, 30, notes="Morning run"), Activity("walk", 2, 40, route="Neighborhood")]
+    result = service.search_activities(activities, "beach")
+
+    assert result == []
+
+def test_search_activities_handles_none_fields(service):
+    '''Search should safely handle activities with no notes or route.'''
+    activity_1 = Activity("run", 3, 30)
+    activity_2 = Activity("walk", 2, 40, notes="Morning walk")
+
+    activities = [activity_1, activity_2]
+    result = service.search_activities(activities, "morning")
+
+    assert result == [activity_2]
+
+def test_search_activities_does_not_modify_original_list(service):
+    '''Search should not modify the original list.'''
+    activity_1 = Activity("run", 3, 30, notes="Trail run")
+    activity_2 = Activity("walk", 2, 40, notes="Neighborhood walk")
+
+    activities = [activity_1, activity_2]
+
+    result = service.search_activities(activities, "trail")
+
+    assert activities == [activity_1, activity_2]
+    assert result == [activity_1]
+    assert result != activities
+
+if __name__ == "__main__":
+    pytest.main([__file__])
+    
+# def test_create_activity():
+#     """A created activity should be stored."""
+
+#     service = ActivityService()
+#     activity = Activity( activity_type="run", distance=3, duration=25,)
+#     result = service.create_activity(activity)
+
+#     assert result == activity
+#     assert len(service.get_all_activities()) == 1
+
+# def test_get_all_activities():
+#     """Service should return every stored activity."""
+
+#     service = ActivityService()
+#     activity1 = Activity( activity_type="run", distance=3, duration=25,)
+#     activity2 = Activity( activity_type="walk", distance=2, duration=40,)
+#     service.create_activity(activity1)
+#     service.create_activity(activity2)
+#     activities = service.get_all_activities()
+
+#     assert len(activities) == 2
+#     assert activity1 in activities
+#     assert activity2 in activities
+
+# def test_get_activity_by_id():
+#     '''Service should find an activity by its UUID.'''
+
+#     service = ActivityService()
+#     activity = Activity( activity_type="run", distance=5, duration=45,)
+#     service.create_activity(activity)
+
+#     found = service.get_activity_by_id(activity.id)
+
+#     assert found == activity
+
+# def test_get_activity_by_invalid_id():
+#     """Unknown IDs should return None."""
+
+#     service = ActivityService()
+#     result = service.get_activity_by_id(uuid4())
+
+#     assert result is None
+
+# def test_update_activity():
+#     '''Updating an activity should replace its values.'''
+#     service = ActivityService()
+#     activity = Activity(activity_type="run", distance=3, duration=30, notes="Morning",)
+
+#     service.create_activity(activity)
+#     updated = Activity(activity_type="run", distance=5, duration=45, notes="Evening",)
+#     service.update_activity(activity.id, updated)
+#     result = service.get_activity_by_id(activity.id)
+
+#     assert result is not None
+#     assert result.distance == 5
+#     assert result.duration == 45
+#     assert result.notes == "Evening"
+
+# def test_update_missing_activity():
+#     '''Updating a missing activity should return None.'''
+
+#     service = ActivityService()
+#     updated = Activity(activity_type="run", distance=5, duration=45,)
+#     result = service.update_activity(uuid4(), updated)
+
+#     assert result is None
+
+# def test_delete_activity():
+#     '''Deleting an activity should remove it.'''
+#     service = ActivityService()
+#     activity = Activity(activity_type="walk", distance=2, duration=35,)
+
+#     service.create_activity(activity)
+#     deleted = service.delete_activity(activity.id)
+
+#     assert deleted is True
+#     assert len(service.get_all_activities()) == 0
+
+# def test_delete_missing_activity():
+#     '''Deleting an unknown activity should return False.'''
+#     service = ActivityService()
+#     deleted = service.delete_activity(uuid4())
+
+#     assert deleted is False
+
+# def test_create_multiple_activities():
+#     '''Service should support storing multiple activities.'''
+#     service = ActivityService()
+
+#     for i in range(4):
+#         service.create_activity(Activity(activity_type="walk", distance=i + 1, duration=(i + 1) * 10))
+
+#     for i in range(3):
+#         service.create_activity(Activity(activity_type="run", distance=i + 1, duration=(i + 1) * 10))    
+    
+#     assert len(service.get_all_activities()) == 7
+
+# if __name__ == "__main__":
+#     pytest.main([__file__])

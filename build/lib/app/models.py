@@ -1,0 +1,116 @@
+# Defines the data. Activity, Goal. Nothing else.
+# Models are usually nouns.
+from dataclasses import dataclass, field
+from datetime import datetime
+from uuid import UUID, uuid4
+
+@dataclass
+class Activity:
+    # required params cannot come after params with defaults
+    activity_type: str 
+    distance: float # miles
+    duration: float # minutes
+    date: datetime = field(default_factory=datetime.now)
+    id: UUID = field(default_factory=uuid4, init=False) # generate its own id automatically w/o CLI | prevents users from passing ID manually when creating an object
+    notes: str | None = None
+    route: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.distance <= 0:
+            raise ValueError("Distance must be greater than 0.")
+        if self.duration <= 0:
+            raise ValueError("Duration must be greater than 0.")
+        if self.activity_type not in ("walk", "run"):
+            raise ValueError("Activity type must be 'walk' or 'run'.")
+    
+    # TODO: calculate_pace(self) -> float
+    def calculate_pace(self) -> float:
+        # Return minutes per mile.
+        "Return pace in minutes per mile"
+        return self.duration / self.distance
+
+    def formatted_pace(self) -> str:
+        # Return pace formatted as MM:SS.
+        pace = self.calculate_pace()
+        minutes = int(pace)
+        seconds = round((pace - minutes) * 60)
+        return f"{minutes}:{seconds:02d} min/mi"
+    
+    def formatted_date(self) -> str:
+        #Return a user-friendly date and time.
+        return self.date.strftime("%b %d, %Y %I:%M %p")
+    
+    # TODO: __str__(self) -> str
+    def __str__(self) -> str:
+        # Return a user-friendly representation of the activity.
+        notes = self.notes if self.notes else "None"
+        route = self.route if self.route else "None"
+        return (
+            f"{self.activity_type.title()} | "
+            f"{self.distance:.1f} mi | "
+            f"{self.duration:.0f} min | "
+            # f"Pace: {self.calculate_pace():.1f} min/mi | "
+            f"Pace: {self.formatted_pace()} | "
+            f"Notes: {notes} | "
+            f"Route: {route} | "
+            f"Date: {self.formatted_date()}"
+        )
+
+    # TODO: to_dict(self) -> dict
+    def to_dict(self) -> dict:
+        # Convert the Activity object into a dictionary.
+        return {
+            "id": str(self.id),
+            "date": self.date.isoformat(),
+            "activity_type": self.activity_type,
+            "distance": self.distance,
+            "duration": self.duration,
+            "notes": self.notes,
+            "route": self.route,
+        }
+
+VALID_GOAL_TYPES = (
+    "weekly_distance",
+    "monthly_distance",
+    "current_streak",
+    "longest_streak",
+)
+
+@dataclass
+class Goal:
+    '''Represents a fitness goal.'''
+    goal_type: str
+    target: float
+    id: UUID = field(default_factory=uuid4, init=False) # prevents users from passing ID manually when creating an object
+
+    def __post_init__(self) -> None:
+        if self.goal_type not in VALID_GOAL_TYPES:
+            raise ValueError(f"Goal type must be one of {VALID_GOAL_TYPES}")
+
+        if self.target <= 0:
+            raise ValueError("Target must be greater than 0.")
+
+    def __str__(self) -> str:
+        return (
+            f"{self.goal_type.replace("_", " ").title()} "
+            f"Goal: {self.target}"
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "id": str(self.id),
+            "goal_type": self.goal_type,
+            "target": self.target,
+        }
+
+@dataclass
+class Weather:
+    '''This represents weather data in Stride's own domain language.'''
+    city: str
+    country: str
+    temperature: float
+    feels_like: float
+    conditions: str
+    wind_speed: float
+    precipitation_probability: float
+

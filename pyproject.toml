@@ -1,0 +1,28 @@
+# tells Python how to build/install Stride
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stride-cli"
+version = "0.1.0"
+description = "A command-line application for tracking walks and runs."
+requires-python = ">=3.14"
+dependencies = [
+    "rich",
+    "plotext",
+    "requests",
+]
+
+# When the user types stride, call the main() function inside app/main.py.
+[project.scripts]
+stride = "main:main"
+
+[tool.setuptools]
+# Force setuptools to look at the root directory for main.py
+py-modules = ["main"]
+
+# tells setuptools to discover the app package
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

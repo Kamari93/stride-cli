@@ -1,0 +1,295 @@
+# Stores and retrieves information. SQLite only.
+# External Library needed -> SQLite (belongs here only) 
+
+from app.models import Activity, Goal
+from uuid import UUID
+from datetime import datetime
+
+import sqlite3
+from pathlib import Path
+
+class ActivityRepository:
+    '''Handles persistence for Activity objects.'''
+    '''Stores and retrieves Activity objects using SQLite.'''
+
+    def __init__(self, db_path: str = "stride.db") -> None:
+        '''The constructor opens the database and make sure the schema exists.'''
+        self.connection = sqlite3.connect(db_path)
+        self.connection.row_factory = sqlite3.Row
+
+        self.create_tables()
+
+    def create_tables(self) -> None:
+        '''Create database tables if they don't already exist.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS activities (
+                id TEXT PRIMARY KEY,
+                activity_type TEXT NOT NULL,
+                distance REAL NOT NULL,
+                duration REAL NOT NULL,
+                date TEXT NOT NULL,
+                notes TEXT,
+                route TEXT
+            )
+
+            '''
+        )
+
+        cursor.execute(
+            '''
+            CREATE TABLE IF NOT EXISTS goals (
+                id TEXT PRIMARY KEY,
+                goal_type TEXT NOT NULL,
+                target REAL NOT NULL
+            )
+
+            '''
+        )
+
+        self.connection.commit()
+
+    def close(self) -> None:
+        '''Close the SQLite connection.'''
+        self.connection.close()
+
+    def create_activity(self, activity: Activity) -> Activity:
+        '''Stores a new activity to the database.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO activities (
+                id,
+                activity_type,
+                distance,
+                duration,
+                date,
+                notes,
+                route
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (
+                str(activity.id),
+                activity.activity_type,
+                activity.distance,
+                activity.duration,
+                activity.date.isoformat(),
+                activity.notes,
+                activity.route,
+            ),
+        )
+        self.connection.commit()
+        return activity
+
+    def get_all_activities(self) -> list[Activity]:
+        '''Return all stored activities.'''
+        cursor = self.connection.cursor()
+        cursor.execute(
+            '''
+            SELECT *
+            FROM activities
+            ORDER BY date DESC
+            '''
+        )
+
+        rows = cursor.fetchall()
+
+        return [self._row_to_activity(row) for row in rows]
+
+    def get_activity_by_id(self, activity_id: UUID) -> Activity | None:
+        '''Return a single activity by its ID.'''
+        cursor = self.connection.cursor()
+
+        row = cursor.execute(
+            '''
+            SELECT *
+            FROM activities
+            WHERE id = ?
+            ''',
+            (str(activity_id),),
+        ).fetchone()
+
+        if row is None:
+            return None
+        
+        return self._row_to_activity(row)
+
+    def update_activity( self, activity_id: UUID, updated_activity: Activity,) -> Activity | None:
+        '''Update an existing activity and return the updated activity.'''
+        existing = self.get_activity_by_id(activity_id)
+
+        if existing is None:
+            return None
+
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            UPDATE activities
+            SET activity_type = ?,
+                distance = ?,
+                duration = ?,
+                date = ?,
+                notes = ?,
+                route = ?
+            WHERE id = ?
+            ''',
+            (
+                updated_activity.activity_type,
+                updated_activity.distance,
+                updated_activity.duration,
+                updated_activity.date.isoformat(),
+                updated_activity.notes,
+                updated_activity.route,
+                str(activity_id)
+            ),
+        )
+
+        self.connection.commit()
+        updated_activity.id = existing.id
+
+        return updated_activity
+
+    def delete_activity(self, activity_id: UUID) -> bool:
+        '''Delete an activity by ID. Return True if deleted, otherwise False.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            DELETE FROM activities
+            WHERE id = ?
+            ''',
+            (str(activity_id),),
+        )
+
+        self.connection.commit()
+
+        return cursor.rowcount > 0 # SQLite tells us how many rows were affected.
+
+    def _row_to_activity(self, row: sqlite3.Row) -> Activity:
+        '''Convert a SQLite row into an Activity object.'''
+        activity = Activity(
+            activity_type=row["activity_type"],
+            distance=row["distance"],
+            duration=row["duration"],
+            notes=row["notes"],
+            route=row["route"],
+            )
+        activity.id = UUID(row["id"])
+        activity.date = datetime.fromisoformat(row["date"])
+
+        return activity
+
+    def create_goal(self, goal: Goal) -> Goal:
+        """Store a new goal."""
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            INSERT INTO goals (
+                id,
+                goal_type,
+                target
+            )
+            VALUES(?, ?, ?)
+            ''',
+            (
+                str(goal.id),
+                goal.goal_type,
+                goal.target
+            ),
+        )
+        self.connection.commit()
+        return goal
+
+    def _row_to_goal(self, row: sqlite3.Row) -> Goal:
+        '''Convert a SQLite row into a Goal object. ORM'''
+        goal = Goal(
+            goal_type=row["goal_type"],
+            target=row["target"],
+        )
+        goal.id = UUID(row["id"])
+
+        return goal
+
+    def get_all_goals(self,) -> list[Goal]:
+        '''Return all stored goals.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            SELECT *
+            FROM goals 
+            '''
+        )
+
+        rows = cursor.fetchall()
+
+        return [self._row_to_goal(row) for row in rows]
+
+    def get_goal_by_id(self, goal_id: UUID) -> Goal | None:
+        '''Return a goal by ID.'''
+        cursor = self.connection.cursor()
+
+        row = cursor.execute(
+            '''
+            SELECT *
+            FROM goals
+            WHERE id=?
+            ''',
+            (str(goal_id),),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        return self._row_to_goal(row)
+
+
+    def update_goal(self, goal_id: UUID, updated_goal: Goal,) -> Goal | None:
+        '''Update an existing goal and return the updated goal.'''
+        existing = self.get_goal_by_id(goal_id)
+
+        if existing is None:
+            return None
+
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            UPDATE goals
+            SET goal_type = ?,
+                target = ?
+            WHERE id = ?
+            ''',
+            (
+                updated_goal.goal_type,
+                updated_goal.target,
+                str(goal_id)
+            ),
+        )
+
+        self.connection.commit()
+        updated_goal.id = existing.id
+
+        return updated_goal
+
+    def delete_goal(self, goal_id: UUID) -> bool:
+        '''Delete a goal by ID.'''
+        cursor = self.connection.cursor()
+
+        cursor.execute(
+            '''
+            DELETE FROM goals
+            WHERE id = ?
+            ''',
+            (str(goal_id),),
+        )
+
+        self.connection.commit()
+
+        return cursor.rowcount > 0 # SQLite tells us how many rows were affected.

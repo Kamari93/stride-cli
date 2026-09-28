@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: stride-cli
+Version: 0.1.0
+Summary: A command-line application for tracking walks and runs.
+Requires-Python: >=3.14
+License-File: LICENSE
+Requires-Dist: rich
+Requires-Dist: plotext
+Requires-Dist: requests
+Dynamic: license-file

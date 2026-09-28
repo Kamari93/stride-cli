@@ -2,7 +2,7 @@ import pytest
 import requests
 from unittest.mock import Mock, patch
 from app.models import Weather
-from app.weather import WeatherProvider, WeatherService, OpenMeteoProvider
+from app.weather import WeatherProvider, Weather_Service, OpenMeteoProvider
 
 class FakeWeatherProvider(WeatherProvider):
     '''Fake provider used for testing.'''
@@ -21,7 +21,7 @@ class FakeWeatherProvider(WeatherProvider):
 def test_weather_service_returns_weather():
     '''Weather Service should retrieve data from provider given city name'''
     provider = FakeWeatherProvider()
-    service = WeatherService(provider)
+    service = Weather_Service(provider)
 
     weather = service.get_weather("Austin")
 
@@ -34,7 +34,7 @@ def test_weather_service_returns_weather():
 def test_weather_service_rejects_empty_city():
     '''Weather Service should reject empty city and raise Value Error'''
     provider = FakeWeatherProvider()
-    service = WeatherService(provider)
+    service = Weather_Service(provider)
 
     with pytest.raises(ValueError, match="City cannot be empty."):
         service.get_weather(" ")
