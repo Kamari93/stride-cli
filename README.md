@@ -29,7 +29,7 @@ What started as a simple activity tracker grew into a larger project where I cou
 Clone the repository and create a virtual environment:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Kamari93/stride-cli.git
 cd stride-cli
 python3 -m venv .venv
 source .venv/bin/activate
