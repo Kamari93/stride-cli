@@ -56,19 +56,19 @@ Services
 Repository
  ↓
 SQLite
-```text
+```
 
 Additional components handle statistics, data export, visualization, and external weather services.
 
 Main Components
 
-* Models — Define the application’s core data structures, including activities, goals, and weather data.
-* CLI — Handles user interaction and Rich terminal presentation.
-* Services — Contains application and business logic while coordinating between the CLI and data layers.
-* Repository — Handles SQLite persistence and database operations.
-* Statistics — Performs calculations such as distance totals, pace, streaks, and distance history.
-* Export — Handles CSV generation.
-* Weather Provider — Separates weather API integration from the rest of the application through a provider interface.
-* Charts — Uses Plotext to visualize activity and distance history.
+- Models — Define the application’s core data structures, including activities, goals, and weather data.
+- CLI — Handles user interaction and Rich terminal presentation.
+- Services — Contains application and business logic while coordinating between the CLI and data layers.
+- Repository — Handles SQLite persistence and database operations.
+- Statistics — Performs calculations such as distance totals, pace, streaks, and distance history.
+- Export — Handles CSV generation.
+- Weather Provider — Separates weather API integration from the rest of the application through a provider interface.
+- Charts — Uses Plotext to visualize activity and distance history.
 
 The application uses dependency injection for services and external providers, allowing components to be tested independently and reducing direct dependencies between layers.
