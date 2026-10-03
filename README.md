@@ -2,6 +2,14 @@
 
 A command-line application for tracking walks and runs.
 
+## Why I Built Stride
+
+Stride CLI started as a Boot.dev personal project. I wanted to create something that I could use in my daily life.
+
+I enjoy light cardio, so I wanted a simple way to stay consistent and track my progress from my computer.
+
+What started as a simple activity tracker grew into a larger project where I could practice real software concepts including SQLite persistence, service-layer architecture, testing, data visualization, API integration, and Python packaging.
+
 ## Features
 
 - Log walking and running activities
@@ -38,3 +46,29 @@ Run the application:
 ```bash
 stride
 ```
+## Architecture
+Stride follows a layered architecture designed to keep responsibilities separated and reduce coupling between components.
+```text
+CLI
+ ↓
+Services
+ ↓
+Repository
+ ↓
+SQLite
+```text
+
+Additional components handle statistics, data export, visualization, and external weather services.
+
+Main Components
+
+* Models — Define the application’s core data structures, including activities, goals, and weather data.
+* CLI — Handles user interaction and Rich terminal presentation.
+* Services — Contains application and business logic while coordinating between the CLI and data layers.
+* Repository — Handles SQLite persistence and database operations.
+* Statistics — Performs calculations such as distance totals, pace, streaks, and distance history.
+* Export — Handles CSV generation.
+* Weather Provider — Separates weather API integration from the rest of the application through a provider interface.
+* Charts — Uses Plotext to visualize activity and distance history.
+
+The application uses dependency injection for services and external providers, allowing components to be tested independently and reducing direct dependencies between layers.
