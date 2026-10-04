@@ -72,3 +72,24 @@ Additional components handle statistics, data export, visualization, and externa
 - **Charts** — Uses Plotext to visualize activity and distance history.
 
 The application uses dependency injection for services and external providers, allowing components to be tested independently and reducing direct dependencies between layers.
+
+## Testing
+
+Stride uses pytest for automated testing.
+
+The test suite covers core application behavior including:
+
+* Activity and goal models
+* SQLite repository operations
+* Service-layer business logic
+* Statistics and streak calculations
+* Activity sorting, filtering, and searching
+* CSV export
+* Weather services and API error handling
+* Distance history and visualization data
+
+Run the full test suite with:
+```bash
+python3 -m pytest -v 
+```
+All tests should pass before making changes to the project.
