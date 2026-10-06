@@ -104,4 +104,4 @@ All tests should pass before making changes to the project.
 * **Requests** — HTTP requests for weather API integration
 * **Open-Meteo** — Weather and geocoding data
 * **setuptools** — Python package building and installation
-* **uv* — Optional development and dependency management
+* **uv** — Optional development and dependency management
