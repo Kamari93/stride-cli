@@ -105,3 +105,33 @@ All tests should pass before making changes to the project.
 * **Open-Meteo** — Weather and geocoding data
 * **setuptools** — Python package building and installation
 * **uv** — Optional development and dependency management
+
+## Project Structure 
+
+```text
+stride-cli/
+├── app/
+│   ├── cli.py          # Terminal interface and user interaction
+│   ├── database.py     # SQLite persistence
+│   ├── export.py       # CSV export
+│   ├── models.py       # Application data models
+│   ├── services.py     # Application and business logic
+│   ├── stats.py        # Statistics and distance calculations
+│   ├── utils.py        # Shared utilities
+│   └── weather.py      # Weather provider and service
+├── docs/
+│   ├── architecture.md
+│   ├── design.md
+│   ├── notes.md
+│   └── roadmap.md
+├── tests/              # Automated tests
+├── main.py             # Application entry point
+├── pyproject.toml      # Package configuration and dependencies
+├── requirements.txt    # Dependency list
+├── uv.lock             # Locked dependency versions for uv
+├── README.md
+├── LICENSE
+└── .gitignore
+```
+
+The project separates application code, automated tests, and technical documentation to support maintainability and future development.
