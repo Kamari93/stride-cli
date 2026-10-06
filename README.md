@@ -93,3 +93,15 @@ Run the full test suite with:
 python3 -m pytest -v 
 ```
 All tests should pass before making changes to the project.
+
+## Tech Stack
+
+* **Python 3.14** — Application development
+* **SQLite** — Local data persistence
+* **pytest** — Automated testing
+* **Rich** — Terminal UI and formatted output
+* **Plotext** — Terminal-based data visualization
+* **Requests** — HTTP requests for weather API integration
+* **Open-Meteo** — Weather and geocoding data
+* **setuptools** — Python package building and installation
+* **uv* — Optional development and dependency management
