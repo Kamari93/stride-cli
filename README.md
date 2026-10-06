@@ -96,7 +96,7 @@ All tests should pass before making changes to the project.
 
 ## Tech Stack
 
-* **Python 3.14** — Application development
+* **Python 3.14** — App development
 * **SQLite** — Local data persistence
 * **pytest** — Automated testing
 * **Rich** — Terminal UI and formatted output
