@@ -135,3 +135,49 @@ stride-cli/
 ```
 
 The project separates application code, automated tests, and technical documentation to support maintainability and future development.
+
+## Design Decisions
+
+Stride was designed with an emphasis on separation of concerns, testability, and maintainability.
+
+### Separation of Concerns
+
+The application separates the user interface, business logic, data persistence, and statistical calculations into different components. This keeps individual parts of the application focused on specific responsibilities and makes the code easier to test and maintain.
+
+### Dependency Injection
+
+Services receive their dependencies rather than creating them internally. This reduces coupling between components and makes it possible to substitute dependencies during testing.
+
+### Weather Provider Abstraction
+
+Weather functionality uses a provider interface between the application and the external weather API. The application can therefore interact with a weather provider without being tightly coupled to a specific API implementation.
+
+### SQLite Persistence
+
+SQLite provides lightweight local persistence without requiring a separate database server. Activities and goals remain available between application sessions while keeping the project simple to install and run.
+
+### Automated Testing
+
+Core application behavior is covered by automated tests using pytest. Dependencies such as the weather provider can be replaced with test doubles, allowing application logic to be tested without relying on external services.
+
+## Development
+
+Create a virtual environment and install Stride in editable mode:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+Install pytest for development and testing:
+
+```bash
+pip install pytest
+```
+
+Run the test suite:
+```bash
+python3 -m pytest -v 
+```
+The project can also be used with uv as an optional development workflow.
