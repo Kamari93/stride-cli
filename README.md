@@ -24,6 +24,23 @@ What started as a simple activity tracker grew into a larger project where I cou
 - Check current weather by city
 - Rich terminal interface
 
+## Screenshots
+
+### Main Menu 
+![Stride main menu](screenshots/main-menu.png)
+
+### Activities
+![Stride activity list](screenshots/activities.png)
+
+### Goals
+![Stride activity goals](screenshots/goals.png)
+
+### Weather Check
+![Stride check weather](screenshots/weather.png)
+
+### Charts
+![Stride charts](screenshots/chart.png)
+
 ## Installation
 
 Clone the repository and create a virtual environment:
